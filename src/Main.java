@@ -20,7 +20,7 @@ public class Main {
             }
         }
 
-
+        /// Dies ist ein Test
 
         brett.draw();
         //brett.randomize();
