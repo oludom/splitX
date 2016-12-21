@@ -1,9 +1,8 @@
 package game;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-
+import ui.BasicUI;
 /**
  * 
  */
@@ -20,6 +19,15 @@ public class StartGame {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
+		BasicUI ui = new BasicUI();
+		
+		boolean run = ui.startGame();
+		while(run){
+			run = ui.startGame();
+		}
+	}
+	
+	private void unusedMethods(){
 		Board b = new Board(8);
 		BufferedReader buffRead = new BufferedReader(new InputStreamReader(System.in));
 		

@@ -18,7 +18,7 @@ public class Board {
 	private ArrayList<Stone> whiteStones = new ArrayList<Stone>();
 	
 	private int border = 1;
-	private BoardPoint maxPoint;
+	public BoardPoint maxPoint;
 	
 	public Board(int dimension){
 		this.dimension = dimension;
@@ -50,7 +50,7 @@ public class Board {
 			if(i == 0){
 				for(int k = 0; k<temp.length; k++){
 					if(k < border){
-						temp[i][k] = "  ";
+						temp[i][k] = "   ";
 					}else{
 						temp[i][k] = alphabet[k - border]+ "|";
 					}
@@ -63,7 +63,12 @@ public class Board {
 				}
 			}*/
 			if(i > 0){
-				temp[i][0] = String.valueOf(i) + "|";
+				if(i < 10){
+					temp[i][0] =" " + String.valueOf(i) + "|";
+				}else{
+					temp[i][0] = String.valueOf(i) + "|";
+				}
+				
 				for(int k = 1; k < temp.length; k++){
 					temp[i][k] = " |";
 				}
