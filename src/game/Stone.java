@@ -10,6 +10,12 @@ package game;
  *
  */
 public class Stone {
+	/***
+	 * 
+	 * 
+	 */
+	String colorWhite = "o";
+	String colorBlack = "*";
 	final BoardPoint point;
 	final boolean color;
 	
@@ -35,9 +41,9 @@ public class Stone {
 	
 	public String getColor(){
 		if(color){
-			return "*";
+			return colorBlack;
 		}else{
-			return "o";
+			return colorWhite;
 		}
 	}
 	
