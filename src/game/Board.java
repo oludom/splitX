@@ -18,7 +18,7 @@ public class Board {
 	private ArrayList<Stone> whiteStones = new ArrayList<Stone>();
 	
 	private int border = 1;
-	private BoardPoint maxPoint;
+	public BoardPoint maxPoint;
 	
 	public Board(int dimension){
 		this.dimension = dimension;
@@ -50,7 +50,7 @@ public class Board {
 			if(i == 0){
 				for(int k = 0; k<temp.length; k++){
 					if(k < border){
-						temp[i][k] = "  ";
+						temp[i][k] = "   ";
 					}else{
 						temp[i][k] = alphabet[k - border]+ "|";
 					}
@@ -63,7 +63,12 @@ public class Board {
 				}
 			}*/
 			if(i > 0){
-				temp[i][0] = String.valueOf(i) + "|";
+				if(i < 10){
+					temp[i][0] =" " + String.valueOf(i) + "|";
+				}else{
+					temp[i][0] = String.valueOf(i) + "|";
+				}
+				
 				for(int k = 1; k < temp.length; k++){
 					temp[i][k] = " |";
 				}
@@ -79,7 +84,7 @@ public class Board {
 			allStones.add(stone);
 			
 			if(stone.hasColor()){
-				blackStones.add(stone);
+				addBlack(stone);
 			}
 			if(!stone.hasColor()){
 				addWhite(stone);
@@ -94,49 +99,23 @@ public class Board {
 	
 	private void addWhite(Stone stone){
 		for(Stone white : whiteStones){
-			//System.out.println("Stone:" + stone.getPoint().left());
-			//System.out.println("white:" + white.getPoint());
 			
-			if(stone.getPoint().top().compareTo(white.getPoint()) == 0){
-				white.setChildBot(stone);
-				stone.setParentTop(white);
-			}
-			if(stone.getPoint().bottom().compareTo(white.getPoint()) == 0){
-				white.setParentTop(stone);
-				stone.setChildBot(white);
-			}
+			setParency(stone, white);
 			
-			if(stone.getPoint().right().compareTo(white.getPoint()) == 0){
-				stone.setChildRight(white);
-				white.setParentLeft(stone);
-			}
-			if(stone.getPoint().left().compareTo(white.getPoint()) == 0){
-				white.setChildRight(stone);
-				stone.setParentLeft(white);
-			}
-			
-			if(stone.getPoint().topright().compareTo(white.getPoint()) == 0){
-				stone.setParentTopRight(white);
-				white.setChildBotLeft(stone);
-			}
-			if(stone.getPoint().botleft().compareTo(white.getPoint()) == 0){
-				white.setParentTopRight(stone);
-				stone.setChildBotLeft(white);
-			}
-			
-			if(stone.getPoint().topleft().compareTo(white.getPoint()) == 0){
-				stone.setParentTopLeft(white);
-				white.setChildBotRight(stone);
-			}
-			if(stone.getPoint().botright().compareTo(white.getPoint()) == 0){
-				white.setParentTopLeft(stone);
-				stone.setChildBotRight(white);
-			}
 		}
 		whiteStones.add(stone);
 	}
 	
-	public int maxRow(){
+	private void addBlack(Stone stone){
+		for(Stone black : blackStones){
+			
+			setParency(stone, black);
+			
+		}
+		blackStones.add(stone);
+	}
+	
+	public int maxRowWhite(){
 		int row = 0;
 		for(Stone stone : whiteStones){
 			if(!stone.hasParentTop()){
@@ -157,9 +136,69 @@ public class Board {
 			}
 			
 		}
-		
-		
 		return row;
+	}
+	
+	public int maxRowBlack(){
+		int row = 0;
+		for(Stone stone : blackStones){
+			if(!stone.hasParentTop()){
+				int temp = stone.countTopBot();
+				if(temp > row) row = temp;
+			}
+			if(!stone.hasParentLeft()){
+				int temp = stone.countLeftRight();
+				if(temp > row) row = temp;
+			}
+			if(!stone.hasParentTopLeft()){
+				int temp = stone.countTopLeftBotRight();
+				if(temp > row) row = temp;
+			}
+			if(!stone.hasParentTopRight()){
+				int temp = stone.countTopRightBotLeft();
+				if(temp > row) row = temp;
+			}
+			
+		}
+		return row;
+	}
+	
+	private void setParency(Stone newStone,Stone oldStone){
+		if(newStone.getPoint().top().compareTo(oldStone.getPoint()) == 0){
+			oldStone.setChildBot(newStone);
+			newStone.setParentTop(oldStone);
+		}
+		if(newStone.getPoint().bottom().compareTo(oldStone.getPoint()) == 0){
+			oldStone.setParentTop(newStone);
+			newStone.setChildBot(oldStone);
+		}
+		
+		if(newStone.getPoint().right().compareTo(oldStone.getPoint()) == 0){
+			newStone.setChildRight(oldStone);
+			oldStone.setParentLeft(newStone);
+		}
+		if(newStone.getPoint().left().compareTo(oldStone.getPoint()) == 0){
+			oldStone.setChildRight(newStone);
+			newStone.setParentLeft(oldStone);
+		}
+		
+		if(newStone.getPoint().topright().compareTo(oldStone.getPoint()) == 0){
+			newStone.setParentTopRight(oldStone);
+			oldStone.setChildBotLeft(newStone);
+		}
+		if(newStone.getPoint().botleft().compareTo(oldStone.getPoint()) == 0){
+			oldStone.setParentTopRight(newStone);
+			newStone.setChildBotLeft(oldStone);
+		}
+		
+		if(newStone.getPoint().topleft().compareTo(oldStone.getPoint()) == 0){
+			newStone.setParentTopLeft(oldStone);
+			oldStone.setChildBotRight(newStone);
+		}
+		if(newStone.getPoint().botright().compareTo(oldStone.getPoint()) == 0){
+			oldStone.setParentTopLeft(newStone);
+			newStone.setChildBotRight(oldStone);
+		}
 	}
 	
 	public void draw(){
