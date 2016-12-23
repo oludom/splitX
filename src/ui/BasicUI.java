@@ -7,11 +7,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import game.*;
-import ui.UiException.WrongFormatException;
+import ui.UiException.*;
+import game.GameException.*;
 
 
 /**
- * @author Sören Wirries
+ * @author Soeren Wirries
  *
  */
 public class BasicUI {
@@ -59,18 +60,33 @@ public class BasicUI {
 		this.pr("Bitte Punkt angeben >");
 		String read = "";
 		BoardPoint bp = new BoardPoint("A", 1);
+		int yStart = 1;
 		int yMax = board.maxPoint.yPos;
 		String xMax = board.maxPoint.xPos;
+		if(yMax > 9){
+			yStart = 0;
+			yMax = 9;
+		}
 		try{
 			read = bufferedReader.readLine();
-			if(read.matches("[A-"+xMax.toUpperCase()+"a-"+xMax.toLowerCase()+"][1-"+yMax+"]{1,2}")){
-				String first = read.substring(0,1);
-				int second = Integer.parseInt(read.substring(1));
-				bp = new BoardPoint(first, second);
+			if(read.matches("[A-Z,a-z][0-9]{1,2}")){
+			
+				if(read.matches("[A-"+xMax.toUpperCase()+"a-"+xMax.toLowerCase()+"]["+yStart+"-"+yMax+"]{1,2}")){
+					String first = read.substring(0,1);
+					int second = Integer.parseInt(read.substring(1));
+					bp = new BoardPoint(first, second);
+				}else{
+					throw  new WrongEntryException();
+				}
 			}else{
-				throw  new WrongFormatException();
+				throw new WrongFormatException();
 			}
 		}catch (WrongFormatException e) {
+			
+			this.prln(e.toString());
+			bp = readBP();
+			
+		}catch (WrongEntryException e) {
 			
 			this.prln(e.toString());
 			bp = readBP();
@@ -164,38 +180,70 @@ public class BasicUI {
 		prUIBuff();
 		board.draw();
 		prUIBuff();
+		
 		prln("Schwarz beginnt mit dem ersten Zug.");
 		prln("");
-		board.addStone(new Stone(readBP(),true));
+		
 		boolean run = true;
+		
+		do{
+			try {
+				run = board.addStone(new Stone(readBP(),true));
+			} catch (BoardOutOfBoundException e) {
+				prln(e.toString());
+			}
+			
+		}while(!run);
+		
 		boolean color = false;
+		
 		board.draw();
 		prUIBuff();
+		String winningPhrase = "";
+		String errorPhrase = "";
 		while(run){
 			for(int i = 1; i <= 2; i++){
-				if(color){
-					prln("Schwarz ist am Zug.");
-					board.addStone(new Stone(readBP(),color));
-					if(board.maxRowBlack() > 5){
-						run = false;
-						break;
+				prln(errorPhrase);
+				errorPhrase = "";
+				try{
+					if(color){
+						prln("Schwarz ist am Zug.");
+						
+						board.addStone(new Stone(readBP(),color));
+						
+					}else{
+						prln("Weiss ist am Zug.");
+						
+						board.addStone(new Stone(readBP(),color));
+					
 					}
-				}else{
-					prln("Weiss ist am Zug.");
-					board.addStone(new Stone(readBP(),color));
-					if(board.maxRowWhite() > 5){
-						run = false;
-						break;
-					}
+					board.checkWinner();
+					
+				}catch (GameWonException e) {
+					winningPhrase = e.toString();
+					run = false;
+					break;
+				}catch (BoardOutOfBoundException e) {
+					
+					errorPhrase = e.toString();
+					i--;
+					
+				}catch (Exception e) {
+					
+					errorPhrase = e.toString();
+					i--;
+					
+				}finally {
+					prUIBuff();
+					board.draw();
+					prUIBuff();
 				}
-				prUIBuff();
-				board.draw();
-				prUIBuff();
+				
 			}
 			color = !color;
 		}
 		prUIBuff();
-		prln("Ein Spieler hat gewonnen");
+		prln(winningPhrase);
 		prUIBuff();
 		
 		int wahl = selectMenue(new String[]{"Moechtest du nochmal Spielen?","Ja","Nein"});

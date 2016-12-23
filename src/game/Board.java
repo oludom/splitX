@@ -1,5 +1,6 @@
 package game;
 import java.util.ArrayList;
+import game.GameException.*;
 
 /**
  * 
@@ -78,7 +79,7 @@ public class Board {
 	}
 	
 	
-	public boolean addStone(Stone stone){
+	public boolean addStone(Stone stone) throws BoardOutOfBoundException{
 		if(checkPoint(stone.getPoint())){
 			
 			allStones.add(stone);
@@ -92,7 +93,7 @@ public class Board {
 			
 			return true;
 		}else{
-			return false;
+			throw new BoardOutOfBoundException();
 		}
 		
 	}
@@ -161,6 +162,15 @@ public class Board {
 			
 		}
 		return row;
+	}
+	
+	public void checkWinner() throws GameWonException{
+		if(this.maxRowBlack() > 5){
+			throw new GameWonException(true);
+		}
+		if(this.maxRowWhite() > 5){
+			throw new GameWonException(false);
+		}
 	}
 	
 	private void setParency(Stone newStone,Stone oldStone){

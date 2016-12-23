@@ -4,7 +4,7 @@
 package ui;
 
 /**
- * @author Sören Wirries
+ * @author Soeren Wirries
  *
  */
 public class UiException extends Exception {
@@ -17,7 +17,7 @@ public class UiException extends Exception {
 		
 	}
 	
-	static class WrongFormatException extends UiException{
+	static public class WrongFormatException extends UiException{
 		/**
 		 * 
 		 */
@@ -28,6 +28,24 @@ public class UiException extends Exception {
 		}
 		
 		public WrongFormatException(String text) {
+			this.errorTxt = text;
+		}
+		public String toString(){
+			return errorTxt;
+		}
+	}
+	
+	static public class WrongEntryException extends UiException{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		String errorTxt;
+		public WrongEntryException() {
+			this.errorTxt = "Die Eingabe liegt nicht im Wertebereich!";
+		}
+		
+		public WrongEntryException(String text) {
 			this.errorTxt = text;
 		}
 		public String toString(){
