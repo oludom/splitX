@@ -242,5 +242,13 @@ public class Board {
 			field[y][x+1] = stone.getColor() + "|";
 		}
 	}
+	
+	public ArrayList<Stone> getWhiteStones(){
+		return whiteStones;
+	}
+	
+	public ArrayList<Stone> getBlackStones(){
+		return blackStones;
+	}
 
 }
