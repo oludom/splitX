@@ -152,6 +152,7 @@ public class BasicUI {
 	}
 	
 	public boolean startGame(){
+		prln("");
 		this.prln("Willkommen beim Spiel Connect6!");
 		prln("");
 		//TODO Regeln einfuegen
