@@ -41,6 +41,7 @@ public class Compute {
                     tmp = 1 + checkDiagonalUp(gameBoard, n, i, k, zeichen);
                     if (longestRow < tmp) {
                         longestRow = tmp;
+                        /*System.out.println("Temp: " + tmp);*/
                     }
                 }
             }
@@ -65,8 +66,24 @@ public class Compute {
 
     private int checkDiagonalUp(String[][] gameBoard, int n, int i, int k, String sign) {
         int diagonalStones = 0;
-        if (i > 0 && k < n-1) {
-            for (int j = 1; j <= i; j++) {
+        if (i > 0 && k < n) {
+            for (int j = 1; j <= i && j < (n-k); j++) {
+                if (gameBoard[i-j][k+j].equals(sign)) {
+                    diagonalStones += 1;
+                } else {
+                    break;
+                }
+            }
+        }
+        return diagonalStones;
+    }
+
+    /*private int checkDiagonalUp(String[][] gameBoard, int n, int i, int k, String sign) {
+        int diagonalStones = 0;
+        if (i > 0 && k < n) {
+            for (int j = 1; j < i || j < k; j++) {
+                System.out.println("i-j: " + (i-j));
+                System.out.println("k+j: " + (k+j));
                 if (gameBoard[i-j][k+j].equals(sign)) {
                     diagonalStones += 1;
                 }
@@ -76,8 +93,7 @@ public class Compute {
             }
         }
         return diagonalStones;
-    }
-
+    }*/
 
     private int checkVertical(String[][] gameBoard, int i, int k, String sign) {
         int verticalStones = 0;

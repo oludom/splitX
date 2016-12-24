@@ -45,9 +45,8 @@ public class IO {
             int n = readInt("Wie groß soll das Spielfeld sein? (Zahl zwischen 6 und 20)");
             if (n < 6 || n > 20) {
                 System.out.println("Ungültige Eingabe, Bitte erneut eingeben!");
-                readMatrixSize();
+                n = readMatrixSize();
             }
-            System.out.println("Matrixgröße: " + n);
             return n;
         }
 
@@ -83,24 +82,24 @@ public class IO {
         public static String[][] addValue (String[][] old, int n, String zeichen, int spielernummer) throws Exception {
             String[][] newGameBoard = old;
             System.out.println("Wo wollen sie ihre Steine platzieren, Spieler " + spielernummer + "?");
-            int x = readSpalte(n);
-            int y = readInt("Zeile (Nummer von 1 bis " + n + ")")-1;
-            if (x>=0 && x<n && y>=0 && y<n) {
-                if (newGameBoard[y][x] == " |") {
-                    newGameBoard[y][x] = zeichen + "|";
+            while (true) {
+                int x = readSpalte(n);
+                int y = readInt("Zeile (Nummer von 1 bis " + n + ")")-1;
+                if (x>=0 && x<n && y>=0 && y<n) {
+                    if (newGameBoard[y][x] == " |") {
+                        newGameBoard[y][x] = zeichen + "|";
+                        break;
+                    }
+                    else if (newGameBoard[y][x] != " |"){
+                        System.out.println("Dieses Feld ist schon besetzt , bitte ein anderes Feld füllen.");
+                    }
                 }
-                else if (newGameBoard[y][x] != " |"){
-                    System.out.println("Dieses Feld ist schon besetzt , bitte ein anderes Feld füllen.");
-                    addValue(newGameBoard, n, zeichen, spielernummer);
+                else if (x<0 || x>=n || y<0 || y>=n){
+                    System.out.println("Dieses Feld existiert nicht , bitte ein anderes Feld füllen.");
                 }
-            }
-            else if (x<0 || x>=n || y<0 || y>=n){
-                System.out.println("Dieses Feld existiert nicht , bitte ein anderes Feld füllen.");
-                addValue(newGameBoard, n, zeichen, spielernummer);
-            }
-            else {
-                System.out.println("Ungültige Eingabe, bitte erneut eingeben.");
-                addValue(newGameBoard, n, zeichen, spielernummer);
+                else {
+                    System.out.println("Ungültige Eingabe, bitte erneut eingeben.");
+                }
             }
             return newGameBoard;
         }
