@@ -10,7 +10,8 @@ package game;
 public class GameException extends Exception{
 
 	/**
-	 * 
+	 * In dieser Klasser werden alle Exceptions aufgeführt die das Spiel (Board-Klasse)
+	 * werfen kann. Die Exceptions muessen nicht immer negertive Folgen haben (vgl GameWonException)
 	 */
 	
 	String errorMsg = "";
@@ -25,6 +26,9 @@ public class GameException extends Exception{
 	}
 	
 	static public class BoardOutOfBoundException extends GameException{
+		/**
+		 * wird idR geworfen wenn der Stein(Punkt) nicht auf dem Spielfeld liegt.
+		 */
 		private static final long serialVersionUID = 1L;
 		String errorMsg = "";
 		
@@ -38,6 +42,10 @@ public class GameException extends Exception{
 	}
 	
 	static public class GameWonException extends GameException{
+		/**
+		 * wird geworfen wenn der Spieler 6 (oder mehr) Steine als Kette auf dem Feld hat
+		 * unterscheidet aufgrund der Farbe (color/boolean) welcher Spieler gewonnen hat.
+		 */
 		private static final long serialVersionUID = 1L;
 		String errorMsg = "";
 		
