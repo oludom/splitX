@@ -169,6 +169,7 @@ public class BasicUI {
 				break;
 			case 3:
 				//TODO Multiplay einfuegen
+				this.startBot();
 				break;
 			case 4: return false;
 			
@@ -363,6 +364,67 @@ public class BasicUI {
 		int wahl = selectMenue(new String[]{"Moechtest du nochmal Spielen?","Ja","Nein"});
 		switch(wahl){
 			case 1: startSingleBot();
+				break;
+			case 2: 
+				break;
+		}
+	}
+	
+	public void startBot(){
+		int dim = readBoardDim();
+		board = new Board(dim);
+		
+		boolean color = false;
+		Bot blackBot = new Bot(board, true, false);
+		Bot whiteBot = new Bot(board, false, false);
+		boolean run = true;
+		String winningPhrase = "";
+		String errorPhrase = "";
+		blackBot.next();
+		int rounds = 0;
+		while(run){
+			for(int i = 1; i <= 2; i++){
+				prln(errorPhrase);
+				errorPhrase = "";
+				try{
+					if(color){
+						prln("Black:"+rounds);
+						blackBot.next();
+					}else{
+						prln("White"+rounds);
+						whiteBot.next();
+					
+					}
+					board.checkWinner();
+					
+				}catch (GameWonException e) {
+					winningPhrase = e.toString();
+					run = false;
+					break;
+				
+				}catch (Exception e) {
+					
+					errorPhrase = e.toString();
+					i--;
+					
+				}finally {
+					prUIBuff();
+					board.draw();
+					prUIBuff();
+				}
+				
+			}
+			color = !color;
+			rounds++;
+		}
+		prUIBuff();
+		board.draw();
+		prln(winningPhrase);
+		prUIBuff();
+		
+		int wahl = selectMenue(new String[]{"Moechtest du nochmal Spielen?","Ja","Nein"});
+		switch(wahl){
+			case 1: startBot();
 				break;
 			case 2: 
 				break;

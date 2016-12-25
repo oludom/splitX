@@ -131,8 +131,11 @@ public class Bot {
 			finalMap = addToLine(finalMap, oppStone, oppMaxRow,4);
 		}
 		
+		
+		
 		if(withOwn && ownStone.size() > 0){
 			boolean firstrun = true;
+			int runOverFlow = 0;
 			do{
 				if(ownMaxRow >= 4 && firstrun){
 					finalMap = addToLine(finalMap, ownStone, ownMaxRow,1);
@@ -144,7 +147,11 @@ public class Bot {
 					
 				}else{
 					int breakpoint = 0;
-					if(ownStone.size() > 4){
+					if(runOverFlow > 3){
+						String s = "t";
+						s += s;
+					}
+					if(ownStone.size() > 4 && runOverFlow < 5){
 						breakpoint = 2;
 					}
 					finalMap = addToLine(finalMap, ownStone, breakpoint,1);
@@ -152,6 +159,7 @@ public class Bot {
 					finalMap = addToLine(finalMap, ownStone, breakpoint,3);
 					finalMap = addToLine(finalMap, ownStone, breakpoint,4);
 				}
+				runOverFlow++;
 			}while(finalMap.size() == 0);
 		}
 		
