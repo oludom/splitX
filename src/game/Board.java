@@ -26,7 +26,11 @@ public class Board {
 	
 	public Board(int dimension){// Konstruktor der Klasse
 		this.dimension = dimension;
+<<<<<<< HEAD
 		maxPoint = new BoardPoint(alphabet[dimension], dimension);
+=======
+		maxPoint = new BoardPoint(alphabet[dimension-1], dimension);
+>>>>>>> refs/heads/ki
 		generateField();//Erzeugt ein leers Feld mit Beschriftung
 	}
 	/**
@@ -312,6 +316,14 @@ public class Board {
 			int y = bp.yPos;
 			field[y][x+1] = stone.getColor() + trenn;//erstezt das Feld mit dem Farbsymbol des Steins und dem Trennzeichen
 		}
+	}
+	
+	public ArrayList<Stone> getWhiteStones(){
+		return whiteStones;
+	}
+	
+	public ArrayList<Stone> getBlackStones(){
+		return blackStones;
 	}
 
 }

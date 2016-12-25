@@ -40,7 +40,7 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * gibt einen Punkt zurück, der von sichselbst aus nach OBEN verschoben wurde
 	 */
 	public BoardPoint top(){
-		return new BoardPoint(xPos, yPos+1);
+		return new BoardPoint(xPos, prevY());
 	}
 	
 	/**
@@ -48,7 +48,7 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * gibt einen Punkt zurück, der von sichselbst aus nach UNTEN verschoben wurde
 	 */
 	public BoardPoint bottom(){
-		return new BoardPoint(xPos, yPos-1);
+		return new BoardPoint(xPos, nextY());
 	}
 	
 	/**
@@ -56,7 +56,7 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * gibt einen Punkt zurück, der von sichselbst aus nach RECHTS verschoben wurde
 	 */
 	public BoardPoint right(){
-		return new BoardPoint(next(), yPos);
+		return new BoardPoint(nextX(), yPos);
 	}
 	
 	/**
@@ -64,7 +64,7 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * gibt einen Punkt zurück, der von sichselbst aus nach LINKS verschoben wurde
 	 */
 	public BoardPoint left(){
-		return new BoardPoint(prev(), yPos);
+		return new BoardPoint(prevX(), yPos);
 	}
 	
 	/**
@@ -72,7 +72,7 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * gibt einen Punkt zurück, der von sichselbst aus nach OBEN-LINKS verschoben wurde
 	 */
 	public BoardPoint topleft(){
-		return new BoardPoint(prev(), yPos+1);
+		return new BoardPoint(prevX(), prevY());
 	}
 	
 	/**
@@ -80,7 +80,7 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * gibt einen Punkt zurück, der von sichselbst aus nach UNTEN-LINKS verschoben wurde
 	 */
 	public BoardPoint botleft(){
-		return new BoardPoint(prev(), yPos-1);
+		return new BoardPoint(prevX(), nextY());
 	}
 	
 	/**
@@ -88,7 +88,7 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * gibt einen Punkt zurück, der von sichselbst aus nach OBEN-RECHTS verschoben wurde
 	 */
 	public BoardPoint topright(){
-		return new BoardPoint(next(), yPos+1);
+		return new BoardPoint(nextX(), prevY());
 	}
 	
 	/**
@@ -96,7 +96,7 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * gibt einen Punkt zurück, der von sichselbst aus nach UNTEN-RECHTS verschoben wurde
 	 */
 	public BoardPoint botright(){
-		return new BoardPoint(next(), yPos-1);
+		return new BoardPoint(nextX(), nextY());
 	}
 	
 	/**
@@ -104,7 +104,7 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * gibt den Punkt als String zurueck
 	 */
 	public String toString(){
-		return xPos + " " + yPos;
+		return xPos + "/" + yPos;
 	}
 	
 	/**
@@ -114,7 +114,11 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * und gibt den naechsten Buchstaben zurueck
 	 * wenn Ende erreicht ist dann wird Z zurueckgegeben
 	 */
+<<<<<<< HEAD
 	private String next(){
+=======
+	private String nextX(){
+>>>>>>> refs/heads/ki
 		int i = Arrays.asList(alphabet).indexOf(xPos);
 		if(i == 25) return "Z";
 		return alphabet[i+1];
@@ -127,10 +131,25 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * und gibt den vorherigen Buchstaben zurueck 
 	 * wenn Anfang erreicht ist wurd A zurueckgegeben
 	 */
+<<<<<<< HEAD
 	private String prev(){
+=======
+	private String prevX(){
+>>>>>>> refs/heads/ki
 		int i = Arrays.asList(alphabet).indexOf(xPos);
 		if(i == 0) return "A";
 		return alphabet[i-1];
+	}
+	
+	private int nextY(){
+		return yPos +1;
+	}
+	
+	private int prevY(){
+		if(yPos -1 > 0){
+			return yPos -1;
+		}
+		return 1;
 	}
 
 }
