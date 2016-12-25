@@ -11,6 +11,7 @@ import ui.UiException.*;
 import game.GameException.*;
 
 
+
 /**
  * @author Soeren Wirries
  *
@@ -156,7 +157,7 @@ public class BasicUI {
 		this.prln("Willkommen beim Spiel Connect6!");
 		prln("");
 		//TODO Regeln einfuegen
-		int auswahl = selectMenue(new String[]{"Spielmodus auswaehlen:","Singleplayer", "Singleplayer mit Bot (in Arbeit)",
+		int auswahl = selectMenue(new String[]{"Spielmodus auswaehlen:","Singleplayer", "Singleplayer mit Bot",
 				"Multiplayer (in Arbeit)","Spiel verlassen"});
 		
 		switch(auswahl){
@@ -164,7 +165,7 @@ public class BasicUI {
 				this.startSingle();
 				break;
 			case 2: 
-				//TODO Singelplay mit Bot einfuegen
+				//TODO Bot einfuegen
 				break;
 			case 3:
 				//TODO Multiplay einfuegen
@@ -255,4 +256,6 @@ public class BasicUI {
 				break;
 		}
 	}
+	
+	
 }

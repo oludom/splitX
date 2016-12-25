@@ -153,13 +153,12 @@ public class Stone {
 		childBot = stone;
 	}
 	
-<<<<<<< HEAD
-=======
+
 	public Stone getChildBot(){
 		return childBot;
 	}
 	
->>>>>>> refs/heads/ki
+
 	/**
 	 * @return boolean (ob Child vorhanden)
 	 * gibt einen boolean zurueck, ob es einen Child in dieser Position hat
@@ -177,13 +176,10 @@ public class Stone {
 		childRight = stone;
 	}
 	
-<<<<<<< HEAD
-=======
 	public Stone getChildRight(){
 		return childRight;
 	}
-	
->>>>>>> refs/heads/ki
+
 	/**
 	 * @return boolean (ob Child vorhanden)
 	 * gibt einen boolean zurueck, ob es einen Child in dieser Position hat
@@ -201,13 +197,11 @@ public class Stone {
 		childBotRight = stone;
 	}
 	
-<<<<<<< HEAD
-=======
+
 	public Stone getChildBotRight(){
 		return childBotRight;
 	}
-	
->>>>>>> refs/heads/ki
+
 	/**
 	 * @return boolean (ob Child vorhanden)
 	 * gibt einen boolean zurueck, ob es einen Child in dieser Position hat
@@ -228,12 +222,7 @@ public class Stone {
 	public Stone getChildBotLeft(){
 		return childBotLeft;
 	}
-	
-	
-<<<<<<< HEAD
-	
-=======
->>>>>>> refs/heads/ki
+
 	/**
 	 * @return int (Anzahl der Children)
 	 * prueft ob der Stein ein Child an der Position UNTEN hat

@@ -12,7 +12,7 @@ import game.GameException.*;
  */
 public class Board {
 	/**
-	 * Diese Klasse stellt das Spielbrett des Spiel dar. 
+	 *a Diese Klasse stellt das Spielbrett des Spiel dar. 
 	 */
 	private final int dimension; //wird im Konstruktor mit der Groesse geuellt
 	private String[][] field;// stellt das Spielfeld dar
@@ -26,11 +26,11 @@ public class Board {
 	
 	public Board(int dimension){// Konstruktor der Klasse
 		this.dimension = dimension;
-<<<<<<< HEAD
+
 		maxPoint = new BoardPoint(alphabet[dimension], dimension);
-=======
+
 		maxPoint = new BoardPoint(alphabet[dimension-1], dimension);
->>>>>>> refs/heads/ki
+
 		generateField();//Erzeugt ein leers Feld mit Beschriftung
 	}
 	/**

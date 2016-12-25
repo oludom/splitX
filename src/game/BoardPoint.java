@@ -114,11 +114,9 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * und gibt den naechsten Buchstaben zurueck
 	 * wenn Ende erreicht ist dann wird Z zurueckgegeben
 	 */
-<<<<<<< HEAD
-	private String next(){
-=======
+
 	private String nextX(){
->>>>>>> refs/heads/ki
+
 		int i = Arrays.asList(alphabet).indexOf(xPos);
 		if(i == 25) return "Z";
 		return alphabet[i+1];
@@ -131,11 +129,9 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	 * und gibt den vorherigen Buchstaben zurueck 
 	 * wenn Anfang erreicht ist wurd A zurueckgegeben
 	 */
-<<<<<<< HEAD
-	private String prev(){
-=======
+
 	private String prevX(){
->>>>>>> refs/heads/ki
+
 		int i = Arrays.asList(alphabet).indexOf(xPos);
 		if(i == 0) return "A";
 		return alphabet[i-1];
