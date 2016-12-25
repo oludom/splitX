@@ -61,5 +61,18 @@ public class GameException extends Exception{
 			return errorMsg;
 		}
 	}
+	
+	static public class BoardFullException extends GameException{
+		private static final long serialVersionUID = 1L;
+		String errorMsg = "";
+		
+		public BoardFullException(){
+			errorMsg = "Alle Felder auf dem Spielfeld wurden belegt. Das Spiel endet unentschieden.";
+		}
+		
+		public String toString(){
+			return errorMsg;
+		}
+	}
 
 }

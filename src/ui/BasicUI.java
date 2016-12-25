@@ -230,6 +230,10 @@ public class BasicUI {
 					errorPhrase = e.toString();
 					i--;
 					
+				}catch (BoardFullException e) {
+					winningPhrase = e.toString();
+					run = false;
+					break;
 				}catch (Exception e) {
 					
 					errorPhrase = e.toString();
