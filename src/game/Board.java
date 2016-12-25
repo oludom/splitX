@@ -27,8 +27,6 @@ public class Board {
 	public Board(int dimension){// Konstruktor der Klasse
 		this.dimension = dimension;
 
-		maxPoint = new BoardPoint(alphabet[dimension], dimension);
-
 		maxPoint = new BoardPoint(alphabet[dimension-1], dimension);
 
 		generateField();//Erzeugt ein leers Feld mit Beschriftung

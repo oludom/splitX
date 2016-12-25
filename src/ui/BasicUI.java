@@ -157,7 +157,7 @@ public class BasicUI {
 		this.prln("Willkommen beim Spiel Connect6!");
 		prln("");
 		//TODO Regeln einfuegen
-		int auswahl = selectMenue(new String[]{"Spielmodus auswaehlen:","Singleplayer", "Singleplayer mit Bot",
+		int auswahl = selectMenue(new String[]{"Spielmodus auswaehlen:","Singleplayer", "Singleplayer mit Bot (in Arbeit)",
 				"Multiplayer (in Arbeit)","Spiel verlassen"});
 		
 		switch(auswahl){
