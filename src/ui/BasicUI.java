@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import game.*;
 import ui.UiException.*;
 import game.GameException.*;
+import ki.Bot;
 
 
 /**
@@ -156,7 +157,7 @@ public class BasicUI {
 		this.prln("Willkommen beim Spiel Connect6!");
 		prln("");
 		//TODO Regeln einfuegen
-		int auswahl = selectMenue(new String[]{"Spielmodus auswaehlen:","Singleplayer", "Singleplayer mit Bot (in Arbeit)",
+		int auswahl = selectMenue(new String[]{"Spielmodus auswaehlen:","Singleplayer", "Singleplayer mit Bot",
 				"Multiplayer (in Arbeit)","Spiel verlassen"});
 		
 		switch(auswahl){
@@ -164,7 +165,7 @@ public class BasicUI {
 				this.startSingle();
 				break;
 			case 2: 
-				//TODO Singelplay mit Bot einfuegen
+				this.startSingleBot();
 				break;
 			case 3:
 				//TODO Multiplay einfuegen
@@ -250,6 +251,107 @@ public class BasicUI {
 		int wahl = selectMenue(new String[]{"Moechtest du nochmal Spielen?","Ja","Nein"});
 		switch(wahl){
 			case 1: startSingle();
+				break;
+			case 2: 
+				break;
+		}
+	}
+	
+	public void startSingleBot(){
+		int dim = readBoardDim();
+		board = new Board(dim);
+		prUIBuff();
+		board.draw();
+		prUIBuff();
+		int colorWahl = selectMenue(new String[]{"Welche Farbe moechtest du sein?","Schwarz","Weiss"});
+		prln("Schwarz beginnt mit dem ersten Zug.");
+		prln("");
+		boolean run = true;
+		Bot bot = null;
+		boolean myColor = true;
+		switch(colorWahl){
+		case 1: 
+			do{
+				try {
+					run = board.addStone(new Stone(readBP(),true));
+				} catch (BoardOutOfBoundException e) {
+					prln(e.toString());
+				}
+				
+			}while(!run);
+			myColor = true;
+			bot = new Bot(board, false);
+			break;
+		case 2:
+			myColor = false;
+			bot = new Bot(board, true);
+			bot.next();
+			break;
+		}
+		
+		
+		
+		boolean color = false;
+		
+		board.draw();
+		prUIBuff();
+		String winningPhrase = "";
+		String errorPhrase = "";
+		while(run){
+			for(int i = 1; i <= 2; i++){
+				prln(errorPhrase);
+				errorPhrase = "";
+				try{
+					if(color){
+						prln("Schwarz ist am Zug.");
+						if(myColor){
+							board.addStone(new Stone(readBP(),color));
+						}else{
+							bot.next();
+						}
+						
+					}else{
+						prln("Weiss ist am Zug.");
+						
+						if(!myColor){
+							board.addStone(new Stone(readBP(),color));
+						}else{
+							bot.next();
+						}
+					
+					}
+					board.checkWinner();
+					
+				}catch (GameWonException e) {
+					winningPhrase = e.toString();
+					run = false;
+					break;
+				}catch (BoardOutOfBoundException e) {
+					
+					errorPhrase = e.toString();
+					i--;
+					
+				}catch (Exception e) {
+					
+					errorPhrase = e.toString();
+					i--;
+					
+				}finally {
+					prUIBuff();
+					board.draw();
+					prUIBuff();
+				}
+				
+			}
+			color = !color;
+		}
+		prUIBuff();
+		prln(winningPhrase);
+		prUIBuff();
+		
+		int wahl = selectMenue(new String[]{"Moechtest du nochmal Spielen?","Ja","Nein"});
+		switch(wahl){
+			case 1: startSingleBot();
 				break;
 			case 2: 
 				break;

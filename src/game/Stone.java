@@ -153,6 +153,10 @@ public class Stone {
 		childBot = stone;
 	}
 	
+	public Stone getChildBot(){
+		return childBot;
+	}
+	
 	/**
 	 * @return boolean (ob Child vorhanden)
 	 * gibt einen boolean zurueck, ob es einen Child in dieser Position hat
@@ -168,6 +172,10 @@ public class Stone {
 	 */
 	public void setChildRight(Stone stone){
 		childRight = stone;
+	}
+	
+	public Stone getChildRight(){
+		return childRight;
 	}
 	
 	/**
@@ -187,6 +195,10 @@ public class Stone {
 		childBotRight = stone;
 	}
 	
+	public Stone getChildBotRight(){
+		return childBotRight;
+	}
+	
 	/**
 	 * @return boolean (ob Child vorhanden)
 	 * gibt einen boolean zurueck, ob es einen Child in dieser Position hat
@@ -204,7 +216,9 @@ public class Stone {
 		childBotLeft = stone;
 	}
 	
-	
+	public Stone getChildBotLeft(){
+		return childBotLeft;
+	}
 	
 	
 	/**
