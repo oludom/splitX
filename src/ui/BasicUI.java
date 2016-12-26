@@ -158,7 +158,7 @@ public class BasicUI {
 		prln("");
 		//TODO Regeln einfuegen
 		int auswahl = selectMenue(new String[]{"Spielmodus auswaehlen:","Singleplayer", "Singleplayer mit Bot",
-				"Multiplayer (in Arbeit)","Spiel verlassen"});
+				"Multiplayer (in Arbeit)", "Bot vs Bot","Spiel verlassen"});
 		
 		switch(auswahl){
 			case 1:
@@ -169,9 +169,10 @@ public class BasicUI {
 				break;
 			case 3:
 				//TODO Multiplay einfuegen
-				this.startBot();
+				
 				break;
-			case 4: return false;
+			case 4: startBot();
+			case 5: return false;
 			
 		}
 		return true;
