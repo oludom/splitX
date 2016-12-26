@@ -71,31 +71,40 @@ public class Bot {
 			finalMap = addToLine(finalMap, oppStone, oppMaxRow,4);
 		}else if(oppMaxRow >= 3){
 			int startMap = finalMap.size();
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,1);
+			finalMap = addToLine(finalMap, oppStone, 3,1);
+			System.out.println("HardMode vor 1.Map:"+finalMap);
 			finalMap = checkSpace(finalMap, oppStone, 1, startMap);
+			System.out.println("HardMode nach 1.Map:"+finalMap);
+			finalMap = convertToStartHashMap(finalMap);
+			
 			startMap = finalMap.size();
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,2);
-			finalMap = checkSpace(finalMap, oppStone, 1, startMap);
+			finalMap = addToLine(finalMap, oppStone, 3,2);
+			System.out.println("HardMode vor 2.Map:"+finalMap);
+			finalMap = checkSpace(finalMap, oppStone, 2, startMap);
+			System.out.println("HardMode nach 2.Map:"+finalMap);
+			finalMap = convertToStartHashMap(finalMap);
+			
 			startMap = finalMap.size();
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,3);
-			finalMap = checkSpace(finalMap, oppStone, 1, startMap);
+			finalMap = addToLine(finalMap, oppStone, 3,3);
+			System.out.println("HardMode vor 3.Map:"+finalMap);
+			finalMap = checkSpace(finalMap, oppStone, 3, startMap);
+			System.out.println("HardMode nach 3.Map:"+finalMap);
+			finalMap = convertToStartHashMap(finalMap);
+			
 			startMap = finalMap.size();
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,4);
-			finalMap = checkSpace(finalMap, oppStone, 1, startMap);
+			finalMap = addToLine(finalMap, oppStone, 3,4);
+			System.out.println("HardMode vor 4.Map:"+finalMap);
+			finalMap = checkSpace(finalMap, oppStone, 4, startMap);
+			System.out.println("HardMode nach 4.Map:"+finalMap);
+			finalMap = convertToStartHashMap(finalMap);
 		}
 		
-		
+		System.out.println("HardMode Map:"+finalMap);
 		if(finalMap.size() != 0){
+			
+			finalMap = convertToStartHashMap(finalMap);
 			int ranInt = random.nextInt(finalMap.size());
-			if(finalMap.size() == 1 && finalMap.get(0) == null){
-				for(int i = 0; i <= 10; i++){
-					if(finalMap.get(i) != null){
-						finalMap.put(0, finalMap.get(i));
-						i = 11;
-					}
-				}
-				
-			}
+			
 			System.out.println("HardMode Map:"+finalMap);
 			System.out.println("Random:"+ranInt);
 			
@@ -117,17 +126,19 @@ public class Bot {
 		Random random = new Random();
 		boolean withOwn = true;
 		if(oppMaxRow >= 4){
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,1);
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,2);
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,3);
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,4);
+			finalMap = addToLine(finalMap, oppStone, 4,1);
+			finalMap = addToLine(finalMap, oppStone, 4,2);
+			finalMap = addToLine(finalMap, oppStone, 4,3);
+			finalMap = addToLine(finalMap, oppStone, 4,4);
 			System.out.println("OppMaxMap:"+finalMap);
 			if(finalMap.size() != 0) withOwn = false;
-		}else if(oppMaxRow >=3){
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,1);
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,2);
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,3);
-			finalMap = addToLine(finalMap, oppStone, oppMaxRow,4);
+		}
+		if(oppMaxRow >=3 && withOwn){
+			finalMap = addToLine(finalMap, oppStone, 3,1);
+			finalMap = addToLine(finalMap, oppStone, 3,2);
+			finalMap = addToLine(finalMap, oppStone, 3,3);
+			finalMap = addToLine(finalMap, oppStone, 3,4);
+			System.out.println("OppMap:"+finalMap);
 		}
 		
 		
@@ -137,15 +148,19 @@ public class Bot {
 			int runOverFlow = 0;
 			do{
 				if(ownMaxRow >= 4 && firstrun){
-					finalMap = addToLine(finalMap, ownStone, ownMaxRow,1);
-					finalMap = addToLine(finalMap, ownStone, ownMaxRow,2);
-					finalMap = addToLine(finalMap, ownStone, ownMaxRow,3);
-					finalMap = addToLine(finalMap, ownStone, ownMaxRow,4);
-					
+					finalMap = addToLine(finalMap, ownStone, ownMaxRow-1,1);
+					System.out.println("MaxRow 1. Map:"+finalMap);
+					finalMap = addToLine(finalMap, ownStone, ownMaxRow-1,2);
+					System.out.println("MaxRow 2. Map:"+finalMap);
+					finalMap = addToLine(finalMap, ownStone, ownMaxRow-1,3);
+					System.out.println("MaxRow 3. Map:"+finalMap);
+					finalMap = addToLine(finalMap, ownStone, ownMaxRow-1,4);
+					System.out.println("MaxRow 4. Map:"+finalMap);
 					firstrun = false;
 					
 				}else{
 					int breakpoint = 0;
+					//TODO Remove dient nur zum Debuggen
 					if(runOverFlow > 3){
 						String s = "t";
 						s += s;
@@ -281,7 +296,7 @@ public class Bot {
 						onlistRight = checkOnList(stoneList, finalMap.get(i).right());
 						
 					}
-					if(!onlistLeft && !onlistRight){
+					if(!(onlistLeft && onlistRight)){
 						finalMap.remove(i);
 					}
 					
@@ -298,7 +313,7 @@ public class Bot {
 						onlistBotRight = checkOnList(stoneList, finalMap.get(i).botright());
 						
 					}
-					if(!onlistTopLeft && !onlistBotRight){
+					if(!(onlistTopLeft && onlistBotRight)){
 						finalMap.remove(i);
 					}
 					
@@ -315,7 +330,7 @@ public class Bot {
 						onlistBot = checkOnList(stoneList, finalMap.get(i).bottom());
 						
 					}
-					if(!onlistTop && !onlistBot){
+					if(!(onlistTop && onlistBot)){
 						finalMap.remove(i);
 					}
 					break;
@@ -331,7 +346,7 @@ public class Bot {
 						onlistBotLeft = checkOnList(stoneList, finalMap.get(i).botleft());
 						
 					}
-					if(!onlistTopRight && !onlistBotLeft){
+					if(!(onlistTopRight && onlistBotLeft)){
 						finalMap.remove(i);
 					}
 					break;
@@ -373,6 +388,15 @@ public class Bot {
 		
 		
 	}
+ 	private HashMap<Integer, BoardPoint> convertToStartHashMap(HashMap<Integer, BoardPoint> hashmap){
+ 		HashMap<Integer, BoardPoint> convMap = new HashMap<Integer, BoardPoint>();
+ 		int start = 0;
+ 		for(Map.Entry<Integer, BoardPoint> entry : hashmap.entrySet()){
+ 			convMap.put(start, entry.getValue());
+ 			start++;
+ 		}
+ 		return convMap;
+ 	}
 	
 	private BoardPoint lastChildBot(Stone stone){
 		return stone.hasChildBot() ? lastChildBot(stone.getChildBot()) : stone.getPoint();

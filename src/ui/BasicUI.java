@@ -380,23 +380,24 @@ public class BasicUI {
 		board = new Board(dim);
 		
 		boolean color = false;
-		Bot blackBot = new Bot(board, true, false);
-		Bot whiteBot = new Bot(board, false, false);
+		Bot blackBot = new Bot(board, true, true);
+		Bot whiteBot = new Bot(board, false, true);
 		boolean run = true;
 		String winningPhrase = "";
 		String errorPhrase = "";
 		blackBot.next();
-		int rounds = 0;
+		int rounds = 1;
+		int move = 1;
 		while(run){
 			for(int i = 1; i <= 2; i++){
 				prln(errorPhrase);
 				errorPhrase = "";
 				try{
 					if(color){
-						prln("Black:"+rounds);
+						prln("Black:"+rounds+"/"+move);
 						blackBot.next();
 					}else{
-						prln("White"+rounds);
+						prln("White:"+rounds+"/"+move);
 						whiteBot.next();
 					
 					}
@@ -416,6 +417,7 @@ public class BasicUI {
 					prUIBuff();
 					board.draw();
 					prUIBuff();
+					move++;
 				}
 				
 			}
