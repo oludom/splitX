@@ -23,12 +23,13 @@ public class Board {
 	String trenn = "|";//das Trennzeichen
 	private int border = 1; //Gibt die Breite des Randes an (Groesse wird damit erweitert)
 	public BoardPoint maxPoint;//Stellt den groesst moeglichen Punkt dar
+	private int maxFields = 0;
 	
 	public Board(int dimension){// Konstruktor der Klasse
 		this.dimension = dimension;
 
 		maxPoint = new BoardPoint(alphabet[dimension-1], dimension);
-
+		maxFields = dimension * dimension;
 		generateField();//Erzeugt ein leers Feld mit Beschriftung
 	}
 	/**
@@ -209,12 +210,15 @@ public class Board {
 	 * @throws GameWonException
 	 * prueft beide Farben, ob es eine Reihe mit mehr als 5 Steinen gibt -> ja @throws
 	 */
-	public void checkWinner() throws GameWonException{
+	public void checkWinner() throws GameWonException, BoardFullException{
 		if(this.maxRowBlack() > 5){
 			throw new GameWonException(true);
 		}
 		if(this.maxRowWhite() > 5){
 			throw new GameWonException(false);
+		}
+		if(allStones.size() == maxFields){
+			throw new BoardFullException();
 		}
 	}
 	

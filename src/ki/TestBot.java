@@ -4,7 +4,7 @@
 package ki;
 
 import game.Board;
-import game.BoardPoint;
+import game.GameException.BoardFullException;
 import game.GameException.BoardOutOfBoundException;
 import game.GameException.GameWonException;
 import game.Stone;
@@ -44,6 +44,10 @@ public class TestBot {
 					win = e.toString();
 					run = false;
 					break;
+				}catch (BoardFullException e) {
+					win = e.toString();
+					run = false;
+					break;
 				}
 				board.draw();
 			}
@@ -53,6 +57,10 @@ public class TestBot {
 				try {
 					board.checkWinner();
 				} catch (GameWonException e) {
+					win = e.toString();
+					run = false;
+					break;
+				} catch (BoardFullException e) {
 					win = e.toString();
 					run = false;
 					break;
