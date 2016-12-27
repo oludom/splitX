@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
 import client.Multiplayer;
+import client.NetworkException;
 import game.*;
 import server.Packet;
 import ui.UiException.WrongFormatException;
@@ -163,108 +164,140 @@ public class BasicUI {
 
 	private void startMulti() {
 
-		Multiplayer opponent = new Multiplayer();
+		Multiplayer opponent;
 
-		Packet init = opponent.waitForOpponent();
 
-		System.out.println("Spiel wird gestartet.");
+		try { // fängt alle NetworkExceptions ab und beendet das Spiel
 
-		// initializing normal game
 
-		int dim;
-		boolean first = init.DATA[2] == 1; // DATA2 is 1 if this player should move first
+			opponent = new Multiplayer();
 
-		boolean run = true;
-		boolean color = false; // ich bin immer schwarz
-		boolean winner = false;
 
-		if(first){
+			Packet init = opponent.waitForOpponent();
 
-			dim = readBoardDim();
-			opponent.sendBoardDim(dim);
-			board = new Board(dim);
-			prUIBuff();
-			board.draw();
-			prUIBuff();
+			System.out.println("Spiel wird gestartet.");
 
-			// erster Zug
-			prln("Du bist am Zug!");
-			Stone stone = new Stone(readBP(),color);
-			board.addStone(stone);
-			opponent.sendStone(stone);
-			color = !color;
+			// initializing normal game
 
-			// warte auf zwei Züge des Gegners
-			for(int i = 0; i<2; i++){
-				prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
-				stone = opponent.recvStone(color);
-				board.addStone(stone);
+			int dim;
+			boolean first = init.DATA[2] == 1; // DATA2 is 1 if this player should move first
 
-			}
-			color = !color;
+			boolean run = true;
+			boolean color = false; // ich bin immer weiss
+			boolean winner = false;
 
-		}else{
+			if(first){
 
-			prln("Dein Gegner wählt die Spielbrettgröße...");
-			dim = opponent.recvBoardDim();
-			board = new Board(dim);
-			prUIBuff();
-			board.draw();
-			prUIBuff();
-			color = true;
-
-			prln("Dein Gegner ist am Zug! Warte bis er den ersten Zug gemacht hat");
-			Stone stone = opponent.recvStone(color);
-			board.addStone(stone);
-			color = !color;
-
-		}
-
-		while(run){
-			for(int i = 1; i <= 2; i++){
-				if(!color){
-					prln("Du bist am Zug!");
-					Stone stone = new Stone(readBP(),color);
-					board.addStone(stone);
-					opponent.sendStone(stone);
-					if(board.maxRowBlack() > 5){
-						run = false;
-						winner = color;
-						break;
-					}
-				}else{
-					prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
-					Stone stone = opponent.recvStone(color);
-					board.addStone(stone);
-
-					if(board.maxRowWhite() > 5){
-						run = false;
-						winner = color;
-						break;
-					}
-				}
+				dim = readBoardDim();
+				opponent.sendBoardDim(dim);
+				board = new Board(dim);
 				prUIBuff();
 				board.draw();
 				prUIBuff();
+
+				// erster Zug
+				prln("Du bist am Zug!");
+				Stone stone = new Stone(readBP(),color);
+				board.addStone(stone);
+				opponent.sendStone(stone);
+				color = !color;
+
+				prUIBuff();
+				board.draw();
+				prUIBuff();
+
+				// warte auf zwei Züge des Gegners
+				for(int i = 0; i<2; i++){
+					prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
+					stone = opponent.recvStone(color);
+					board.addStone(stone);
+					prUIBuff();
+					board.draw();
+					prUIBuff();
+				}
+				color = !color;
+
+
+
+			}else{
+
+				prln("Dein Gegner wählt die Spielbrettgröße...");
+				dim = opponent.recvBoardDim();
+				board = new Board(dim);
+				prUIBuff();
+				board.draw();
+				prUIBuff();
+				color = true;
+
+				prln("Dein Gegner ist am Zug! Warte bis er den ersten Zug gemacht hat");
+				Stone stone = opponent.recvStone(color);
+				board.addStone(stone);
+				color = !color;
+
+				prUIBuff();
+				board.draw();
+				prUIBuff();
+
 			}
-			color = !color;
-		}
 
-		prUIBuff();
-		if(winner){
-			prln("Du hast gewonnen!");
-		}else {
-			prln("Du hast verloren!");
-		}
-		prUIBuff();
+			while(run){
+				for(int i = 1; i <= 2; i++){
+					if(!color){
+						prln("Du bist am Zug!");
+						Stone stone = new Stone(readBP(),color);
+						board.addStone(stone);
+						opponent.sendStone(stone);
+						if(board.maxRowBlack() > 5){
+							run = false;
+							winner = color;
+							break;
+						}
+					}else{
+						prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
+						Stone stone = opponent.recvStone(color);
+						board.addStone(stone);
 
-		prln("Zurück zum Menü in 10 Sekunden.");
-		try {
-			TimeUnit.SECONDS.sleep(10); // warte 10 Sekunden
+						if(board.maxRowWhite() > 5){
+							run = false;
+							winner = color;
+							break;
+						}
+					}
+					prUIBuff();
+					board.draw();
+					prUIBuff();
+				}
+				color = !color;
+			}
+			prUIBuff();
+			board.draw();
+			prUIBuff();
+
+			if(winner){
+				prln("Du hast verloren!");
+			}else {
+				prln("Du hast gewonnen!");
+			}
+			prUIBuff();
+
+			prln("Zurück zum Menü in 5 Sekunden.");
+
+		}catch (NetworkException.ConnectionResetException e){
+			System.out.println("Ein Verbindungsfehler ist aufgetreten. Zurück zum Hauptmenü in 5 Sekunden...");
+		}catch (NetworkException.WrongPacketException e){
+			System.out.println("Empfangene Daten Fehlerhaft. Zurück zum Hauptmenü in 5 Sekunden...");
 		}catch (Exception e){
+			System.out.println("Fehler! ");
+		}finally {
 
+			//opponent.die();
+
+			try {
+				TimeUnit.SECONDS.sleep(5); // warte 10 Sekunden
+			}catch (Exception e){
+
+			}
 		}
-
 
 	}
 

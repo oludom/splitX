@@ -1,4 +1,5 @@
 package game;
+import java.io.Serializable;
 import java.util.*;
 /**
  * 
@@ -8,7 +9,7 @@ import java.util.*;
  * @author Soeren Wirries
  *
  */
-public class BoardPoint implements Comparable<BoardPoint> {
+public class BoardPoint implements Comparable<BoardPoint>, Serializable{
 	public String xPos;
 	public int yPos;
 	private String[] alphabet = {"A", "B", "C", "D", "E", "F", "G","H","I","J", "K", "L","M", "N","O", "P","Q", "R", "S", "T", "U", "V", "W","X", "Y", "Z"};

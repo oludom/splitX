@@ -1,11 +1,7 @@
 package server;
 
-import java.io.DataOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -14,11 +10,11 @@ import java.util.logging.Logger;
  * @author Micha Heiss
  *
  */
-public class Main {
+public class Server {
 
 	public static final int PORT = 5325;
 	private static final int THREADCOUNT = 30;
-	private static final Logger log = Logger.getLogger(Main.class.getName());
+	private static final Logger log = Logger.getLogger(Server.class.getName());
 	public static ClientThreadArray threads = new ClientThreadArray();
 
 	@SuppressWarnings("resource")
@@ -109,6 +105,7 @@ public class Main {
 				log.info("Connection closed!");*/
 			} catch (Exception ex) {
 				log.info("ERROR IO:"+ex.toString());
+				break;
 			}
 			
 		}

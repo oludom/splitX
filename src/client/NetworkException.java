@@ -5,15 +5,13 @@ package client;
  */
 public class NetworkException extends Exception {
 
-    String errorTxt;
+    protected String errorTxt;
 
     public NetworkException(){
 
     }
 
-    static class ConnectionResetException extends NetworkException{
-        private static final long serialVersionUID = 1L;
-        String errorTxt;
+    public static class ConnectionResetException extends NetworkException{
         public ConnectionResetException() {
             this.errorTxt = "Verbindungsfehler!";
         }
@@ -26,4 +24,16 @@ public class NetworkException extends Exception {
         }
     }
 
+    public static class WrongPacketException extends NetworkException {
+        public WrongPacketException() {
+            this.errorTxt = "Daten Fehlerhaft!";
+        }
+
+        public WrongPacketException(String text) {
+            this.errorTxt = text;
+        }
+        public String toString(){
+            return errorTxt;
+        }
+    }
 }

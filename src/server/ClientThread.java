@@ -13,7 +13,7 @@ public class ClientThread extends Thread implements Runnable{
     private Socket conSocket;
     private int id, opid;
     private boolean starts;
-    private static final Logger log = Logger.getLogger(Main.class.getName());
+    private static final Logger log = Logger.getLogger(Server.class.getName());
     private ObjectOutputStream outStream;
     private ObjectInputStream inStream;
 
@@ -57,12 +57,22 @@ public class ClientThread extends Thread implements Runnable{
             try {
                 // wait for Packet to arrive
                 Packet packet = (Packet) inStream.readObject();
-                log.info("received Packet, TYPE: " + packet.TYPE + " ACTION: " + packet.ACTION);
-                Main.threads.getElement(this.opid).sendObject(packet); // send opponent the received Packet
+                //log.info("received Packet, TYPE: " + packet.TYPE + " ACTION: " + packet.ACTION);
+                Server.threads.getElement(this.opid).sendObject(packet); // send opponent the received Packet
             }catch (Exception e){
-                log.info("Error receiving Packet.");
+                log.info("Error receiving Packet. " + e.toString());
+                log.info("Sending STOPGAME-Message.");
+                Server.threads.getElement(this.opid).sendObject(new Packet("CMD", "STOP"));
+                break;
             }
 
+        }
+
+        try {
+            outStream.close();
+            inStream.close();
+        }catch (Exception e){
+            log.info("Failed to close Socket. Exiting thread... " + e.toString());
         }
 
     }
