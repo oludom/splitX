@@ -2,36 +2,69 @@ package server;
 
 import java.io.DataOutputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 /**
- * @author SWirries
+ * @author Micha Heiss
  *
  */
 public class Main {
 
-	public static final int PORT = 61337;
+	public static final int PORT = 5325;
+	private static final int THREADCOUNT = 30;
 	private static final Logger log = Logger.getLogger(Main.class.getName());
-	
+	public static ClientThreadArray threads = new ClientThreadArray();
+
 	@SuppressWarnings("resource")
 	public static void main(String[] args) {
-		String clientSentence;
-		String modSentence;
-		ServerSocket servSocket = null;
+
+		ExecutorService executor = Executors.newFixedThreadPool(THREADCOUNT);
+		ServerSocket serverSocket = null;
 		try{
-			servSocket = new ServerSocket(PORT);
+			serverSocket = new ServerSocket(PORT);
 		}catch(Exception ex){
 			log.info("ERROR:"+ex.toString());
 		}
 		log.info("Server ready!");
 		while(true){
 			try {
-				
-				Socket conSocket = servSocket.accept();
-				log.info("Connectet: "+ conSocket);
-				
+
+
+
+				Socket conSocket1 = serverSocket.accept();
+				log.info("Connectet1: "+ conSocket1);
+
+				int Pos1 = threads.add(new ClientThread(conSocket1));
+
+				//wait for second Client to connect
+				Socket conSocket2 = serverSocket.accept();
+				log.info("Connectet2: "+ conSocket2);
+				int Pos2 = threads.add(new ClientThread(conSocket2));
+
+				// set Opponents (connect Threads)
+				threads.getElement(Pos1).setid(Pos1);
+				threads.getElement(Pos1).setopid(Pos2);
+
+				threads.getElement(Pos2).setid(Pos2);
+				threads.getElement(Pos2).setopid(Pos1);
+
+				// set starting Player
+				threads.getElement(Pos1).toggleStarts();
+
+				//run Threads
+				executor.execute(threads.getElement(Pos1));
+				executor.execute(threads.getElement(Pos2));
+
+
+				//Packet exData = (Packet) inStream.readObject();
+
+				/*
 				//BufferedReader reader = new BufferedReader(new InputStreamReader(conSocket.getInputStream()));
 				ObjectInputStream inStream = new ObjectInputStream(conSocket.getInputStream());
 				Packet exData = (Packet) inStream.readObject();
@@ -66,14 +99,14 @@ public class Main {
 							
 							reCode = "Die Summer ist " + summe;
 						}
-						
+
 				}
 				 
 				DataOutputStream outStream = new DataOutputStream(conSocket.getOutputStream());
 				outStream.writeBytes(reCode);
 				 
 				conSocket.close();
-				log.info("Connection closed!");
+				log.info("Connection closed!");*/
 			} catch (Exception ex) {
 				log.info("ERROR IO:"+ex.toString());
 			}

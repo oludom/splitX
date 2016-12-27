@@ -4,7 +4,7 @@
 package ui;
 
 /**
- * @author Sören Wirries
+ * @author Sï¿½ren Wirries
  *
  */
 public class UiException extends Exception {

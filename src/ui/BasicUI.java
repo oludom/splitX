@@ -5,13 +5,16 @@ package ui;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 
+import client.Multiplayer;
 import game.*;
+import server.Packet;
 import ui.UiException.WrongFormatException;
 
 
 /**
- * @author S�ren Wirries
+ * @author S�ren Wirries
  *
  */
 public class BasicUI {
@@ -150,14 +153,121 @@ public class BasicUI {
 				//TODO Singelplay mit Bot einfuegen
 				break;
 			case 3:
-				//TODO Multiplay einfuegen
+				this.startMulti();
 				break;
 			case 4: return false;
 			
 		}
 		return true;
 	}
-	
+
+	private void startMulti() {
+
+		Multiplayer opponent = new Multiplayer();
+
+		Packet init = opponent.waitForOpponent();
+
+		System.out.println("Spiel wird gestartet.");
+
+		// initializing normal game
+
+		int dim;
+		boolean first = init.DATA[2] == 1; // DATA2 is 1 if this player should move first
+
+		boolean run = true;
+		boolean color = false; // ich bin immer schwarz
+		boolean winner = false;
+
+		if(first){
+
+			dim = readBoardDim();
+			opponent.sendBoardDim(dim);
+			board = new Board(dim);
+			prUIBuff();
+			board.draw();
+			prUIBuff();
+
+			// erster Zug
+			prln("Du bist am Zug!");
+			Stone stone = new Stone(readBP(),color);
+			board.addStone(stone);
+			opponent.sendStone(stone);
+			color = !color;
+
+			// warte auf zwei Züge des Gegners
+			for(int i = 0; i<2; i++){
+				prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
+				stone = opponent.recvStone(color);
+				board.addStone(stone);
+
+			}
+			color = !color;
+
+		}else{
+
+			prln("Dein Gegner wählt die Spielbrettgröße...");
+			dim = opponent.recvBoardDim();
+			board = new Board(dim);
+			prUIBuff();
+			board.draw();
+			prUIBuff();
+			color = true;
+
+			prln("Dein Gegner ist am Zug! Warte bis er den ersten Zug gemacht hat");
+			Stone stone = opponent.recvStone(color);
+			board.addStone(stone);
+			color = !color;
+
+		}
+
+		while(run){
+			for(int i = 1; i <= 2; i++){
+				if(!color){
+					prln("Du bist am Zug!");
+					Stone stone = new Stone(readBP(),color);
+					board.addStone(stone);
+					opponent.sendStone(stone);
+					if(board.maxRowBlack() > 5){
+						run = false;
+						winner = color;
+						break;
+					}
+				}else{
+					prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
+					Stone stone = opponent.recvStone(color);
+					board.addStone(stone);
+
+					if(board.maxRowWhite() > 5){
+						run = false;
+						winner = color;
+						break;
+					}
+				}
+				prUIBuff();
+				board.draw();
+				prUIBuff();
+			}
+			color = !color;
+		}
+
+		prUIBuff();
+		if(winner){
+			prln("Du hast gewonnen!");
+		}else {
+			prln("Du hast verloren!");
+		}
+		prUIBuff();
+
+		prln("Zurück zum Menü in 10 Sekunden.");
+		try {
+			TimeUnit.SECONDS.sleep(10); // warte 10 Sekunden
+		}catch (Exception e){
+
+		}
+
+
+	}
+
 	public void startSingle(){
 		int dim = readBoardDim();
 		board = new Board(dim);
