@@ -268,6 +268,7 @@ public class BasicUI {
 		board = new Board(dim);
 		
 		boolean enableHardMode = false;
+		boolean enableLog = false;
 		int hardBot = selectMenue(new String[]{"Welche Stufe soll der dein Gegner haben?","Einfach","Schwer"});
 		switch (hardBot) {
 		case 1:
@@ -275,6 +276,16 @@ public class BasicUI {
 			break;
 		case 2:
 			enableHardMode = true;
+			break;
+		}
+		
+		int logBot = selectMenue(new String[]{"Sollen die Entscheidung des Bots angezigt werden?","Einfach","Schwer"});
+		switch (logBot) {
+		case 1:
+			enableLog = false;
+			break;
+		case 2:
+			enableLog = true;
 			break;
 		}
 		int colorWahl = selectMenue(new String[]{"Welche Farbe moechtest du sein?","Schwarz","Weiss"});
@@ -297,11 +308,11 @@ public class BasicUI {
 				
 			}while(!run);
 			myColor = true;
-			bot = new Bot(board, false,enableHardMode);
+			bot = new Bot(board, false,enableHardMode,enableLog);
 			break;
 		case 2:
 			myColor = false;
-			bot = new Bot(board, true, enableHardMode);
+			bot = new Bot(board, true, enableHardMode,enableLog);
 			bot.next();
 			break;
 		}
@@ -429,7 +440,7 @@ public class BasicUI {
 		prln(winningPhrase);
 		prUIBuff();
 		
-		int wahl = selectMenue(new String[]{"Moechtest du nochmal Spielen?","Ja","Nein"});
+		int wahl = selectMenue(new String[]{"Soll das Match wiederholt werden?","Ja","Nein"});
 		switch(wahl){
 			case 1: startBot();
 				break;

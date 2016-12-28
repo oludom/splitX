@@ -21,6 +21,10 @@ public class TestBot {
 	 */
 	public static void main(String[] args) {
 		
+		/**
+		 * Dieser Klasse dient nur zum Testen des Bots, sie wird nicht fuer die Funktion benoetigt
+		 */
+		
 		Board board = new Board(20);
 		BasicUI ui = new BasicUI(board);
 		Bot bot = new Bot(board, false);
