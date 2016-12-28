@@ -9,6 +9,7 @@ import game.GameException.BoardOutOfBoundException;
 import game.GameException.GameWonException;
 import game.Stone;
 import ui.BasicUI;
+import ui.UiException.StopGameException;
 
 /**
  * @author Sören Wirries
@@ -36,7 +37,7 @@ public class TestBot {
 				try {
 					
 					board.addStone(new Stone(ui.readBP(),true));
-				} catch (BoardOutOfBoundException e) {
+				} catch (BoardOutOfBoundException | StopGameException e) {
 					// TODO Auto-generated catch block
 					//e.printStackTrace();
 					ui.prln(e.toString());

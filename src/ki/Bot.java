@@ -362,7 +362,7 @@ public class Bot {
 	private HashMap<Integer, BoardPoint> checkSpace(HashMap<Integer, BoardPoint> finalMap, ArrayList<Stone> stoneList, int lineCase, int startMap){
 		/*
 		 * prueft jedes Elemnet auf der Liste ob Luecke in der Reihe
-		 * Bsp: x_x , x_x (auch diagonal und senkrecht)
+		 * Bsp: x_xx , xx_x (auch diagonal und senkrecht)
 		 * Nicht x_o , x__x oder x__o
 		 */
 		for(int i = startMap; i < finalMap.size(); i++){

@@ -190,7 +190,7 @@ public class BasicUI {
 	public void startSingle(){
 
 		try { // player can stop game
-
+			prUIBuff();
 			int dim = readBoardDim();
 			board = new Board(dim);
 			prUIBuff();
@@ -249,7 +249,7 @@ public class BasicUI {
 						run = false;
 						break;
 					}catch (StopGameException e) {
-
+						winningPhrase = e.toString();
 						run = false;
 						break;
 					}catch (Exception e) {
@@ -284,9 +284,10 @@ public class BasicUI {
 	}
 	
 	public void startSingleBot(){
+		prUIBuff();
 		int dim = readBoardDim();
 		board = new Board(dim);
-		
+		prUIBuff();
 		boolean enableHardMode = false;
 		boolean enableLog = false;
 		int hardBot = selectMenue(new String[]{"Welche Stufe soll der dein Gegner haben?","Einfach","Schwer"});
@@ -298,8 +299,8 @@ public class BasicUI {
 			enableHardMode = true;
 			break;
 		}
-		
-		int logBot = selectMenue(new String[]{"Sollen die Entscheidung des Bots angezigt werden?","Einfach","Schwer"});
+		prUIBuff();
+		int logBot = selectMenue(new String[]{"Sollen die Entscheidung des Bots angezeigt werden?","Nein","Ja"});
 		switch (logBot) {
 		case 1:
 			enableLog = false;
@@ -308,6 +309,7 @@ public class BasicUI {
 			enableLog = true;
 			break;
 		}
+		prUIBuff();
 		int colorWahl = selectMenue(new String[]{"Welche Farbe moechtest du sein?","Schwarz","Weiss"});
 		prUIBuff();
 		board.draw();
@@ -315,6 +317,7 @@ public class BasicUI {
 		prln("Schwarz beginnt mit dem ersten Zug.");
 		prln("");
 		boolean run = true;
+		boolean exception = false;
 		Bot bot = null;
 		boolean myColor = true;
 		switch(colorWahl){
@@ -324,9 +327,12 @@ public class BasicUI {
 					run = board.addStone(new Stone(readBP(),true));
 				} catch (BoardOutOfBoundException e) {
 					prln(e.toString());
+				}catch (StopGameException e) {
+					prln(e.toString());
+					exception = true;
 				}
 				
-			}while(!run);
+			}while(!run || exception);
 			myColor = true;
 			bot = new Bot(board, false,enableHardMode,enableLog);
 			break;
@@ -337,12 +343,13 @@ public class BasicUI {
 			break;
 		}
 		
-		
-		
 		boolean color = false;
 		
-		board.draw();
-		prUIBuff();
+		if(!exception){
+			board.draw();
+			prUIBuff();
+		}
+		
 		String winningPhrase = "";
 		String errorPhrase = "";
 		while(run){
@@ -379,6 +386,11 @@ public class BasicUI {
 					errorPhrase = e.toString();
 					i--;
 					
+				}catch(StopGameException e){
+					
+					winningPhrase = e.toString();
+					run = false;
+					break;
 				}catch (Exception e) {
 					
 					errorPhrase = e.toString();
@@ -407,12 +419,60 @@ public class BasicUI {
 	}
 	
 	public void startBot(){
+		prUIBuff();
 		int dim = readBoardDim();
+		prUIBuff();
 		board = new Board(dim);
+		boolean enableHardMode1 = false;
+		boolean enableLog1 = false;
 		
+		int hardBot1 = selectMenue(new String[]{"Welche Stufe soll der 1. Bot (schwarz) haben?","Einfach","Schwer"});
+		switch (hardBot1) {
+		case 1:
+			enableHardMode1 = false;
+			break;
+		case 2:
+			enableHardMode1 = true;
+			break;
+		}
+		prUIBuff();
+		int logBot1 = selectMenue(new String[]{"Sollen die Entscheidungen des 1. Bots (schwarz) angezeigt werden?","Nein","Ja"});
+		switch (logBot1) {
+		case 1:
+			enableLog1 = false;
+			break;
+		case 2:
+			enableLog1 = true;
+			break;
+		}
+		prUIBuff();
+		boolean enableHardMode2 = false;
+		boolean enableLog2 = false;
+		int hardBot2 = selectMenue(new String[]{"Welche Stufe soll der 2. Bot (weiss) haben?","Einfach","Schwer"});
+		switch (hardBot2) {
+		case 1:
+			enableHardMode2 = false;
+			break;
+		case 2:
+			enableHardMode2 = true;
+			break;
+		}
+		prUIBuff();
+		int logBot2 = selectMenue(new String[]{"Sollen die Entscheidungen des 2. Bots (weiss) angezeigt werden?","Nein","Ja"});
+		switch (logBot2) {
+		case 1:
+			enableLog2 = false;
+			break;
+		case 2:
+			enableLog2 = true;
+			break;
+		}
+		prUIBuff();
 		boolean color = false;
-		Bot blackBot = new Bot(board, true, true);
-		Bot whiteBot = new Bot(board, false, true);
+		
+		Bot blackBot = new Bot(board, true, enableHardMode1,enableLog1);
+		Bot whiteBot = new Bot(board, false, enableHardMode2,enableLog2);
+		
 		boolean run = true;
 		String winningPhrase = "";
 		String errorPhrase = "";
