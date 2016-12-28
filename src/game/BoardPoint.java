@@ -10,10 +10,6 @@ import java.util.*;
  *
  */
 public class BoardPoint implements Comparable<BoardPoint>, Serializable{
-	public String xPos;
-	public int yPos;
-
-public class BoardPoint implements Comparable<BoardPoint> {
 	/**
 	 * Diese Klasse stellt eine Punkt auf dem Spielfeld dar
 	 */

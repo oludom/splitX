@@ -33,7 +33,8 @@ public class Multiplayer {
 
     }
 
-    public Packet waitForOpponent() throws NetworkException.ConnectionResetException{
+    public Packet waitForOpponent() throws NetworkException.ConnectionResetException
+    {
         while(true){
             try {
 
@@ -55,7 +56,6 @@ public class Multiplayer {
 
 
     }
-
 
     public int recvBoardDim() throws NetworkException.ConnectionResetException, NetworkException.WrongPacketException {
 
