@@ -57,7 +57,7 @@ public class BasicUI {
 		prln("");
 	}
 	
-	public BoardPoint readBP(){
+	public BoardPoint readBP() throws StopGameException {
 		this.pr("Bitte Punkt angeben >");
 		String read = "";
 		BoardPoint bp = new BoardPoint("A", 1);
@@ -70,6 +70,10 @@ public class BasicUI {
 		}
 		try{
 			read = bufferedReader.readLine();
+			if(read.equals("exit") || read.equals("quit")){
+				
+				throw new StopGameException();
+			}
 			if(read.matches("[A-Z,a-z][0-9]{1,2}")){
 			
 				if(read.matches("[A-"+xMax.toUpperCase()+"a-"+xMax.toLowerCase()+"]["+yStart+"-"+yMax+"]{1,2}")){
@@ -88,10 +92,15 @@ public class BasicUI {
 			bp = readBP();
 			
 		}catch (WrongEntryException e) {
-			
+
 			this.prln(e.toString());
 			bp = readBP();
-			
+
+		}catch (StopGameException e) {
+
+			//this.prln(e.toString());
+			throw new StopGameException();
+
 		}catch (Exception e) {
 			
 			this.prln("Allgemeiner Fehler bei der Eingabe des Punkts");
@@ -179,80 +188,91 @@ public class BasicUI {
 	}
 	
 	public void startSingle(){
-		int dim = readBoardDim();
-		board = new Board(dim);
-		prUIBuff();
-		board.draw();
-		prUIBuff();
-		
-		prln("Schwarz beginnt mit dem ersten Zug.");
-		prln("");
-		
-		boolean run = true;
-		
-		do{
-			try {
-				run = board.addStone(new Stone(readBP(),true));
-			} catch (BoardOutOfBoundException e) {
-				prln(e.toString());
-			}
-			
-		}while(!run);
-		
-		boolean color = false;
-		
-		board.draw();
-		prUIBuff();
-		String winningPhrase = "";
-		String errorPhrase = "";
-		while(run){
-			for(int i = 1; i <= 2; i++){
-				prln(errorPhrase);
-				errorPhrase = "";
-				try{
-					if(color){
-						prln("Schwarz ist am Zug.");
-						
-						board.addStone(new Stone(readBP(),color));
-						
-					}else{
-						prln("Weiss ist am Zug.");
-						
-						board.addStone(new Stone(readBP(),color));
-					
-					}
-					board.checkWinner();
-					
-				}catch (GameWonException e) {
-					winningPhrase = e.toString();
-					run = false;
-					break;
-				}catch (BoardOutOfBoundException e) {
-					
-					errorPhrase = e.toString();
-					i--;
-					
-				}catch (BoardFullException e) {
-					winningPhrase = e.toString();
-					run = false;
-					break;
-				}catch (Exception e) {
-					
-					errorPhrase = e.toString();
-					i--;
-					
-				}finally {
-					prUIBuff();
-					board.draw();
-					prUIBuff();
+
+		try { // player can stop game
+
+			int dim = readBoardDim();
+			board = new Board(dim);
+			prUIBuff();
+			board.draw();
+			prUIBuff();
+
+			prln("Schwarz beginnt mit dem ersten Zug.");
+			prln("");
+
+			boolean run = true;
+
+			do{
+				try {
+					run = board.addStone(new Stone(readBP(),true));
+				} catch (BoardOutOfBoundException e) {
+					prln(e.toString());
 				}
-				
+
+			}while(!run);
+
+			boolean color = false;
+
+			board.draw();
+			prUIBuff();
+			String winningPhrase = "";
+			String errorPhrase = "";
+			while(run){
+				for(int i = 1; i <= 2; i++){
+					prln(errorPhrase);
+					errorPhrase = "";
+					try{
+						if(color){
+							prln("Schwarz ist am Zug.");
+
+							board.addStone(new Stone(readBP(),color));
+
+						}else{
+							prln("Weiss ist am Zug.");
+
+							board.addStone(new Stone(readBP(),color));
+
+						}
+						board.checkWinner();
+
+					}catch (GameWonException e) {
+						winningPhrase = e.toString();
+						run = false;
+						break;
+					}catch (BoardOutOfBoundException e) {
+
+						errorPhrase = e.toString();
+						i--;
+
+					}catch (BoardFullException e) {
+						winningPhrase = e.toString();
+						run = false;
+						break;
+					}catch (StopGameException e) {
+
+						run = false;
+						break;
+					}catch (Exception e) {
+
+						errorPhrase = e.toString();
+						i--;
+
+					}finally {
+						prUIBuff();
+						board.draw();
+						prUIBuff();
+					}
+
+				}
+				color = !color;
 			}
-			color = !color;
+			prUIBuff();
+			prln(winningPhrase);
+			prUIBuff();
+
+		}catch (StopGameException e){
+			this.prln(e.toString());
 		}
-		prUIBuff();
-		prln(winningPhrase);
-		prUIBuff();
 		
 		int wahl = selectMenue(new String[]{"Moechtest du nochmal Spielen?","Ja","Nein"});
 		switch(wahl){
