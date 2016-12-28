@@ -1,4 +1,5 @@
 package game;
+import java.io.Serializable;
 import java.util.*;
 /**
  * 
@@ -8,6 +9,9 @@ import java.util.*;
  * @author Soeren Wirries
  *
  */
+public class BoardPoint implements Comparable<BoardPoint>, Serializable{
+	public String xPos;
+	public int yPos;
 
 public class BoardPoint implements Comparable<BoardPoint> {
 	/**
@@ -108,7 +112,7 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	}
 	
 	/**
-	 * 
+	 *
 	 * @return String
 	 * Prueft im alphabet auf die Nummer des aktuellen Buchstaben
 	 * und gibt den naechsten Buchstaben zurueck
@@ -123,10 +127,10 @@ public class BoardPoint implements Comparable<BoardPoint> {
 	}
 	
 	/**
-	 * 
+	 *
 	 * @return String
 	 * Prueft im alphabet auf die Nummer des aktuellen Buchstaben
-	 * und gibt den vorherigen Buchstaben zurueck 
+	 * und gibt den vorherigen Buchstaben zurueck
 	 * wenn Anfang erreicht ist wurd A zurueckgegeben
 	 */
 
@@ -136,11 +140,11 @@ public class BoardPoint implements Comparable<BoardPoint> {
 		if(i == 0) return "A";
 		return alphabet[i-1];
 	}
-	
+
 	private int nextY(){
 		return yPos +1;
 	}
-	
+
 	private int prevY(){
 		if(yPos -1 > 0){
 			return yPos -1;

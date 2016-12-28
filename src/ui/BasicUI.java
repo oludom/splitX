@@ -5,11 +5,15 @@ package ui;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 
+import client.Multiplayer;
+import client.NetworkException;
 import game.*;
 import ui.UiException.*;
 import game.GameException.*;
 import ki.Bot;
+import server.Packet;
 
 
 /**
@@ -71,11 +75,11 @@ public class BasicUI {
 		try{
 			read = bufferedReader.readLine();
 			if(read.equals("exit") || read.equals("quit")){
-				
+
 				throw new StopGameException();
 			}
 			if(read.matches("[A-Z,a-z][0-9]{1,2}")){
-			
+
 				if(read.matches("[A-"+xMax.toUpperCase()+"a-"+xMax.toLowerCase()+"]["+yStart+"-"+yMax+"]{1,2}")){
 					String first = read.substring(0,1);
 					int second = Integer.parseInt(read.substring(1));
@@ -167,7 +171,7 @@ public class BasicUI {
 		prln("");
 		//TODO Regeln einfuegen
 		int auswahl = selectMenue(new String[]{"Spielmodus auswaehlen:","Singleplayer", "Singleplayer mit Bot",
-				"Multiplayer (in Arbeit)", "Bot vs Bot","Spiel verlassen"});
+				"Multiplayer", "Bot vs Bot","Spiel verlassen"});
 		
 		switch(auswahl){
 			case 1:
@@ -177,8 +181,7 @@ public class BasicUI {
 				this.startSingleBot();
 				break;
 			case 3:
-				//TODO Multiplay einfuegen
-				
+				this.startMulti();
 				break;
 			case 4: startBot();
 			case 5: return false;
@@ -186,7 +189,146 @@ public class BasicUI {
 		}
 		return true;
 	}
-	
+
+	private void startMulti() {
+
+		Multiplayer opponent;
+
+
+		try { // fängt alle NetworkExceptions ab und beendet das Spiel
+
+
+			opponent = new Multiplayer();
+
+
+			Packet init = opponent.waitForOpponent();
+
+			System.out.println("Spiel wird gestartet.");
+
+			// initializing normal game
+
+			int dim;
+			boolean first = init.DATA[2] == 1; // DATA2 is 1 if this player should move first
+
+			boolean run = true;
+			boolean color = false; // ich bin immer weiss
+			boolean winner = false;
+
+			if(first){
+
+				dim = readBoardDim();
+				opponent.sendBoardDim(dim);
+				board = new Board(dim);
+				prUIBuff();
+				board.draw();
+				prUIBuff();
+
+				// erster Zug
+				prln("Du bist am Zug!");
+				Stone stone = new Stone(readBP(),color);
+				board.addStone(stone);
+				opponent.sendStone(stone);
+				color = !color;
+
+				prUIBuff();
+				board.draw();
+				prUIBuff();
+
+				// warte auf zwei Züge des Gegners
+				for(int i = 0; i<2; i++){
+					prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
+					stone = opponent.recvStone(color);
+					board.addStone(stone);
+					prUIBuff();
+					board.draw();
+					prUIBuff();
+				}
+				color = !color;
+
+
+
+			}else{
+
+				prln("Dein Gegner wählt die Spielbrettgröße...");
+				dim = opponent.recvBoardDim();
+				board = new Board(dim);
+				prUIBuff();
+				board.draw();
+				prUIBuff();
+				color = true;
+
+				prln("Dein Gegner ist am Zug! Warte bis er den ersten Zug gemacht hat");
+				Stone stone = opponent.recvStone(color);
+				board.addStone(stone);
+				color = !color;
+
+				prUIBuff();
+				board.draw();
+				prUIBuff();
+
+			}
+
+			while(run){
+				for(int i = 1; i <= 2; i++){
+					if(!color){
+						prln("Du bist am Zug!");
+						Stone stone = new Stone(readBP(),color);
+						board.addStone(stone);
+						opponent.sendStone(stone);
+						if(board.maxRowBlack() > 5){
+							run = false;
+							winner = color;
+							break;
+						}
+					}else{
+						prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
+						Stone stone = opponent.recvStone(color);
+						board.addStone(stone);
+
+						if(board.maxRowWhite() > 5){
+							run = false;
+							winner = color;
+							break;
+						}
+					}
+					prUIBuff();
+					board.draw();
+					prUIBuff();
+				}
+				color = !color;
+			}
+			prUIBuff();
+			board.draw();
+			prUIBuff();
+
+			if(winner){
+				prln("Du hast verloren!");
+			}else {
+				prln("Du hast gewonnen!");
+			}
+			prUIBuff();
+
+			prln("Zurück zum Menü in 5 Sekunden.");
+
+		}catch (NetworkException.ConnectionResetException e){
+			System.out.println("Ein Verbindungsfehler ist aufgetreten. Zurück zum Hauptmenü in 5 Sekunden...");
+		}catch (NetworkException.WrongPacketException e){
+			System.out.println("Empfangene Daten Fehlerhaft. Zurück zum Hauptmenü in 5 Sekunden...");
+		}catch (Exception e){
+			System.out.println("Fehler! ");
+		}finally {
+
+			//opponent.die();
+
+			try {
+				TimeUnit.SECONDS.sleep(5); // warte 10 Sekunden
+			}catch (Exception e){
+
+			}
+		}
+
+	}
+
 	public void startSingle(){
 
 		try { // player can stop game
@@ -273,16 +415,16 @@ public class BasicUI {
 		}catch (StopGameException e){
 			this.prln(e.toString());
 		}
-		
+
 		int wahl = selectMenue(new String[]{"Moechtest du nochmal Spielen?","Ja","Nein"});
 		switch(wahl){
 			case 1: startSingle();
 				break;
-			case 2: 
+			case 2:
 				break;
 		}
 	}
-	
+
 	public void startSingleBot(){
 		prUIBuff();
 		int dim = readBoardDim();
@@ -321,7 +463,7 @@ public class BasicUI {
 		Bot bot = null;
 		boolean myColor = true;
 		switch(colorWahl){
-		case 1: 
+		case 1:
 			do{
 				try {
 					run = board.addStone(new Stone(readBP(),true));
@@ -331,7 +473,7 @@ public class BasicUI {
 					prln(e.toString());
 					exception = true;
 				}
-				
+
 			}while(!run || exception);
 			myColor = true;
 			bot = new Bot(board, false,enableHardMode,enableLog);
@@ -342,14 +484,14 @@ public class BasicUI {
 			bot.next();
 			break;
 		}
-		
+
 		boolean color = false;
-		
+
 		if(!exception){
 			board.draw();
 			prUIBuff();
 		}
-		
+
 		String winningPhrase = "";
 		String errorPhrase = "";
 		while(run){
@@ -364,44 +506,44 @@ public class BasicUI {
 						}else{
 							bot.next();
 						}
-						
+
 					}else{
 						prln("Weiss ist am Zug.");
-						
+
 						if(!myColor){
 							board.addStone(new Stone(readBP(),color));
 						}else{
 							bot.next();
 						}
-					
+
 					}
 					board.checkWinner();
-					
+
 				}catch (GameWonException e) {
 					winningPhrase = e.toString();
 					run = false;
 					break;
 				}catch (BoardOutOfBoundException e) {
-					
+
 					errorPhrase = e.toString();
 					i--;
-					
+
 				}catch(StopGameException e){
-					
+
 					winningPhrase = e.toString();
 					run = false;
 					break;
 				}catch (Exception e) {
-					
+
 					errorPhrase = e.toString();
 					i--;
-					
+
 				}finally {
 					prUIBuff();
 					board.draw();
 					prUIBuff();
 				}
-				
+
 			}
 			color = !color;
 		}
@@ -413,11 +555,11 @@ public class BasicUI {
 		switch(wahl){
 			case 1: startSingleBot();
 				break;
-			case 2: 
+			case 2:
 				break;
 		}
 	}
-	
+
 	public void startBot(){
 		prUIBuff();
 		int dim = readBoardDim();
@@ -425,7 +567,7 @@ public class BasicUI {
 		board = new Board(dim);
 		boolean enableHardMode1 = false;
 		boolean enableLog1 = false;
-		
+
 		int hardBot1 = selectMenue(new String[]{"Welche Stufe soll der 1. Bot (schwarz) haben?","Einfach","Schwer"});
 		switch (hardBot1) {
 		case 1:
@@ -469,10 +611,10 @@ public class BasicUI {
 		}
 		prUIBuff();
 		boolean color = false;
-		
+
 		Bot blackBot = new Bot(board, true, enableHardMode1,enableLog1);
 		Bot whiteBot = new Bot(board, false, enableHardMode2,enableLog2);
-		
+
 		boolean run = true;
 		String winningPhrase = "";
 		String errorPhrase = "";
@@ -490,27 +632,27 @@ public class BasicUI {
 					}else{
 						prln("White:"+rounds+"/"+move);
 						whiteBot.next();
-					
+
 					}
 					board.checkWinner();
-					
+
 				}catch (GameWonException e) {
 					winningPhrase = e.toString();
 					run = false;
 					break;
-				
+
 				}catch (Exception e) {
-					
+
 					errorPhrase = e.toString();
 					i--;
-					
+
 				}finally {
 					prUIBuff();
 					board.draw();
 					prUIBuff();
 					move++;
 				}
-				
+
 			}
 			color = !color;
 			rounds++;
@@ -519,7 +661,7 @@ public class BasicUI {
 		board.draw();
 		prln(winningPhrase);
 		prUIBuff();
-		
+
 		int wahl = selectMenue(new String[]{"Soll das Match wiederholt werden?","Ja","Nein"});
 		switch(wahl){
 			case 1: startBot();
