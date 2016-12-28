@@ -75,17 +75,5 @@ public class GameException extends Exception{
 		}
 	}
 
-	static public class StopGameException extends GameException{
-		private static final long serialVersionUID = 1L;
-		String errorMsg = "";
-
-		public StopGameException(){
-			errorMsg = "Du hast das Spiel beendet!";
-		}
-
-		public String toString(){
-			return errorMsg;
-		}
-	}
 
 }

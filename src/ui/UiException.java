@@ -3,6 +3,8 @@
  */
 package ui;
 
+import game.GameException;
+
 /**
  * @author Soeren Wirries
  *
@@ -50,6 +52,19 @@ public class UiException extends Exception {
 		}
 		public String toString(){
 			return errorTxt;
+		}
+	}
+	
+	static public class StopGameException extends GameException{
+		private static final long serialVersionUID = 1L;
+		String errorMsg = "";
+
+		public StopGameException(){
+			errorMsg = "Du hast das Spiel beendet!";
+		}
+
+		public String toString(){
+			return errorMsg;
 		}
 	}
 

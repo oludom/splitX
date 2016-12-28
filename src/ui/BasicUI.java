@@ -71,7 +71,8 @@ public class BasicUI {
 		try{
 			read = bufferedReader.readLine();
 			if(read.equals("exit") || read.equals("quit")){
-				throw new GameException.StopGameException();
+				
+				throw new StopGameException();
 			}
 			if(read.matches("[A-Z,a-z][0-9]{1,2}")){
 			
@@ -248,7 +249,7 @@ public class BasicUI {
 					}catch (StopGameException e) {
 
 						run = false;
-						throw new StopGameException();
+						break;
 					}catch (Exception e) {
 
 						errorPhrase = e.toString();
