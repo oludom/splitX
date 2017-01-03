@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class Server {
 
 	public static final int PORT = 5325;
-	private static final int THREADCOUNT = 50;
+	private static final int THREADCOUNT = 50; // bei mehr als 50 Spielern, die gleichzeitig ein Multiplayergame starten, wird den Clients, die zu viel sind, nicht mehr geantwortet.
 	private static final Logger log = Logger.getLogger(Server.class.getName());
 	public static ClientThreadArray threads = new ClientThreadArray();
 
@@ -30,15 +30,17 @@ public class Server {
 		log.info("Server ready!");
 		while(true){
 			try {
-
+				// wait for Client to connect
 				Socket conSocket1 = serverSocket.accept();
 				log.info("Connectet1: "+ conSocket1);
 
+				// add new Client to thread array
 				int Pos1 = threads.add(new ClientThread(conSocket1));
 
 				//wait for second Client to connect
 				Socket conSocket2 = serverSocket.accept();
 				log.info("Connectet2: "+ conSocket2);
+				// add second Client to thread array
 				int Pos2 = threads.add(new ClientThread(conSocket2));
 
 				// set Opponents (connect Threads)

@@ -40,7 +40,7 @@ public class GameException extends Exception{
 			return errorMsg;
 		}
 	}
-	
+
 	static public class GameWonException extends GameException{
 		/**
 		 * wird geworfen wenn der Spieler 6 (oder mehr) Steine als Kette auf dem Feld hat
@@ -48,7 +48,7 @@ public class GameException extends Exception{
 		 */
 		private static final long serialVersionUID = 1L;
 		String errorMsg = "";
-		
+
 		public GameWonException(boolean color) {
 			if(color){
 				errorMsg = "Spieler Schwarz hat gewonnen!";
@@ -56,7 +56,23 @@ public class GameException extends Exception{
 				errorMsg = "Spieler Weiss hat gewonnen!";
 			}
 		}
-		
+
+		public String toString(){
+			return errorMsg;
+		}
+	}
+
+	static public class ClientWonException extends GameException{
+		/**
+		 * wird auf dem Server geworfen, wenn ein Client gewinnt und damit das Spiel beendet wird.
+		 */
+		private static final long serialVersionUID = 1L;
+		String errorMsg = "";
+
+		public ClientWonException() {
+			errorMsg = "Finished Game!";
+		}
+
 		public String toString(){
 			return errorMsg;
 		}

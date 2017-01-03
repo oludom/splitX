@@ -328,6 +328,7 @@ public class BasicUI {
 			prUIBuff();
 
 			prln("Zurück zum Menü in 5 Sekunden.");
+			opponent.sendWinMSGtoServer();
 
 		}catch (NetworkException.ConnectionResetException e){
 			System.out.println("Ein Verbindungsfehler ist aufgetreten. Zurück zum Hauptmenü in 5 Sekunden...");

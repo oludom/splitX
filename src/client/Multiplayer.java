@@ -18,7 +18,7 @@ public class Multiplayer {
     public Multiplayer() throws NetworkException.ConnectionResetException{
 
         try{
-            Socket clientSocket = new Socket("127.0.0.1", Server.PORT);
+            Socket clientSocket = new Socket("127.0.0.1", Server.PORT); // TODO trage IP eines Servers ein, der dauerhaft online ist
             outStream = new ObjectOutputStream(clientSocket.getOutputStream());
             outStream.flush();
             inStream = new ObjectInputStream(clientSocket.getInputStream());
@@ -121,5 +121,10 @@ public class Multiplayer {
             System.out.println("Failed to close Socket." + e.toString());
         }
 
+    }
+
+    public void sendWinMSGtoServer() throws Exception {
+        sendPacket(new Packet("MSG", "WINNER"));
+        this.die();
     }
 }
