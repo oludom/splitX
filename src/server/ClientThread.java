@@ -44,13 +44,9 @@ public class ClientThread extends Thread implements Runnable{
             Packet packet = new Packet("player", "startGame", data);
             outStream.writeObject(packet);
 
-
-
         }catch (Exception e){
             log.info("ERROR IO:"+e.toString());
         }
-
-
 
         while(true){
 

@@ -12,14 +12,13 @@ import java.net.Socket;
  */
 public class Multiplayer {
 
-    private Socket clientSocket;
     private ObjectOutputStream outStream;
     private ObjectInputStream inStream;
 
     public Multiplayer() throws NetworkException.ConnectionResetException{
 
         try{
-            clientSocket = new Socket("127.0.0.1", Server.PORT);
+            Socket clientSocket = new Socket("127.0.0.1", Server.PORT);
             outStream = new ObjectOutputStream(clientSocket.getOutputStream());
             outStream.flush();
             inStream = new ObjectInputStream(clientSocket.getInputStream());
@@ -35,26 +34,20 @@ public class Multiplayer {
 
     public Packet waitForOpponent() throws NetworkException.ConnectionResetException
     {
-        while(true){
-            try {
+        try {
 
-                Packet player = (Packet) inStream.readObject(); // Server waits for another player to connect
-                if (player.TYPE.equals("player") && player.ACTION.equals("startGame")) {  // Server found second Player
-                    System.out.println("Gegner gefunden! Meine ID: " + player.DATA[0] + ", Gegner ID: " + player.DATA[1]);
-                    return player;
-                } else {
-                    //System.out.println("Serverdaten fehlerhaft.");
-                    throw new NetworkException.ConnectionResetException();
-                }
-            }catch (Exception e){
-                //System.out.println("Server Verbingungsfehler.");
+            Packet player = (Packet) inStream.readObject(); // Server waits for another player to connect
+            if (player.TYPE.equals("player") && player.ACTION.equals("startGame")) {  // Server found second Player
+                System.out.println("Gegner gefunden! Meine ID: " + player.DATA[0] + ", Gegner ID: " + player.DATA[1]);
+                return player;
+            } else {
+                //System.out.println("Serverdaten fehlerhaft.");
                 throw new NetworkException.ConnectionResetException();
             }
-
-
+        }catch (Exception e){
+            //System.out.println("Server Verbingungsfehler.");
+            throw new NetworkException.ConnectionResetException();
         }
-
-
     }
 
     public int recvBoardDim() throws NetworkException.ConnectionResetException, NetworkException.WrongPacketException {

@@ -123,9 +123,9 @@ public class Bot {
 			 * Im folgendne werden alle Reihen aller Richtungen(waage,diagoanl,senkrecht) geprueft
 			 * ob sie mehr als 3 Steine besitzen, wenn ja ob man Steine anfuegen kann. (addToLine)
 			 * ob diese Reihe eine Luecke besitzt und danach wieder ein Stein des Gegners liegt (checkSpace)
-			 *    wenn negertiv dann werden alle Stein geloescht
+			 *    wenn negativ dann werden alle Stein geloescht
 			 */
-			int startMap = finalMap.size();//setzten des des Listen anfangs fuer diese Abfrgen
+			int startMap = finalMap.size();//setzten des Listenanfangs fuer diese Abfragen
 			finalMap = addToLine(finalMap, oppStone, 3,1);//Liste aller Moeglichkeiten
 			if(enableLog) System.out.println("HardMode vor 1.Map:"+finalMap);//wenn aktiv Ausgabe der gefundenen Moeglichkeiten
 			finalMap = checkSpace(finalMap, oppStone, 1, startMap);//pruefen ob Reihe Luecke besitzt
@@ -166,7 +166,7 @@ public class Bot {
 			
 			try{
 				board.addStone(new Stone(finalMap.get(ranInt) ,color));//fuegt den Stein hinzu
-			}catch (Exception e) {//solte idR nicht aufgerufen werden, da die Punkte schon geprueft wurden
+			}catch (Exception e) {//sollte idR nicht aufgerufen werden, da die Punkte schon geprueft wurden
 				System.out.println("HardMode Exception");
 				return true;
 			}
@@ -457,7 +457,7 @@ public class Bot {
 	}
 	
 	/**
-	 * fuegt ein Stein per Zufall den Feld hinzu
+	 * fuegt einen Stein per Zufall dem Feld hinzu
 	 */
  	private void addRandom(){
 		
