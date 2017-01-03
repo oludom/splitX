@@ -214,6 +214,9 @@ public class BasicUI {
 			boolean color = false; // ich bin immer weiss
 			boolean winner = false;
 
+			String winningPhrase = "";
+			String errorPhrase = "";
+
 			if(first){
 
 				dim = readBoardDim();
@@ -228,7 +231,7 @@ public class BasicUI {
 				Stone stone = new Stone(readBP(),color);
 				board.addStone(stone);
 				opponent.sendStone(stone);
-				color = !color;
+				color = true; // schwarz
 
 				prUIBuff();
 				board.draw();
@@ -237,13 +240,13 @@ public class BasicUI {
 				// warte auf zwei Züge des Gegners
 				for(int i = 0; i<2; i++){
 					prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
-					stone = opponent.recvStone(color);
+					stone = opponent.recvStone(color); // schwarz
 					board.addStone(stone);
 					prUIBuff();
 					board.draw();
 					prUIBuff();
 				}
-				color = !color;
+				color = false; // weiss
 
 
 
@@ -255,12 +258,12 @@ public class BasicUI {
 				prUIBuff();
 				board.draw();
 				prUIBuff();
-				color = true;
+				color = true; // schwarz
 
 				prln("Dein Gegner ist am Zug! Warte bis er den ersten Zug gemacht hat");
 				Stone stone = opponent.recvStone(color);
 				board.addStone(stone);
-				color = !color;
+				color = false; // weiss
 
 				prUIBuff();
 				board.draw();
@@ -270,42 +273,58 @@ public class BasicUI {
 
 			while(run){
 				for(int i = 1; i <= 2; i++){
-					if(!color){
-						prln("Du bist am Zug!");
-						Stone stone = new Stone(readBP(),color);
-						board.addStone(stone);
-						opponent.sendStone(stone);
-						if(board.maxRowBlack() > 5){
-							run = false;
-							winner = color;
-							break;
+					prln(errorPhrase);
+					errorPhrase = "";
+					try {
+						if(color){
+							prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
+							Stone stone = opponent.recvStone(color);
+							board.addStone(stone);
+						}else{
+							prln("Du bist am Zug!");
+							Stone stone = new Stone(readBP(),color);
+							board.addStone(stone);
+							opponent.sendStone(stone);
 						}
-					}else{
-						prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
-						Stone stone = opponent.recvStone(color);
-						board.addStone(stone);
+						board.checkWinner();
+					}catch (GameWonException e) {
+						if(color){
+							winningPhrase = "Du hast verloren!";
+						}else {
+							winningPhrase = "Du hast gewonnen!";
+						}
+						run = false;
+						break;
+					}catch (BoardOutOfBoundException e) {
 
-						if(board.maxRowWhite() > 5){
-							run = false;
-							winner = color;
-							break;
-						}
+						errorPhrase = e.toString();
+						i--;
+
+					}catch (BoardFullException e) {
+						winningPhrase = e.toString();
+						run = false;
+						break;
+					}catch (StopGameException e) {
+						winningPhrase = e.toString();
+						run = false;
+						break;
+					}catch (Exception e) {
+
+						errorPhrase = e.toString();
+						i--;
+
+					}finally {
+						prUIBuff();
+						board.draw();
+						prUIBuff();
 					}
-					prUIBuff();
-					board.draw();
-					prUIBuff();
+
 				}
 				color = !color;
 			}
-			prUIBuff();
-			board.draw();
-			prUIBuff();
 
-			if(winner){
-				prln("Du hast verloren!");
-			}else {
-				prln("Du hast gewonnen!");
-			}
+			prUIBuff();
+			prln(winningPhrase);
 			prUIBuff();
 
 			prln("Zurück zum Menü in 5 Sekunden.");
