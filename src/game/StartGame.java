@@ -6,7 +6,7 @@ import ui.BasicUI;
  */
 
 /**
- * @author Soeren Wirries
+ * @author Soeren Wirries, Jahn Kuppinger, Micha Heiss
  *
  */
 public class StartGame {

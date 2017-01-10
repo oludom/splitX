@@ -6,7 +6,7 @@ package ui;
 import game.GameException;
 
 /**
- * @author Soeren Wirries
+ * @author Soeren Wirries, Jahn Kuppinger, Micha Heiss
  *
  */
 public class UiException extends Exception {

@@ -17,7 +17,6 @@ public class Server {
 	private static final Logger log = Logger.getLogger(Server.class.getName());
 	public static ClientThreadArray threads = new ClientThreadArray();
 
-	@SuppressWarnings("resource")
 	public static void main(String[] args) {
 
 		ExecutorService executor = Executors.newFixedThreadPool(THREADCOUNT);

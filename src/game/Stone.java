@@ -6,7 +6,7 @@ package game;
  */
 
 /**
- * @author Soeren Wirries
+ * @author Soeren Wirries, Jahn Kuppinger, Micha Heiss
  *
  */
 public class Stone {

@@ -18,7 +18,7 @@ public class Multiplayer {
     public Multiplayer() throws NetworkException.ConnectionResetException{
 
         try{
-            Socket clientSocket = new Socket("127.0.0.1", Server.PORT); // TODO trage IP eines Servers ein, der dauerhaft online ist
+            Socket clientSocket = new Socket("192.168.1.1", Server.PORT); // TODO trage IP eines Servers ein, der dauerhaft online ist
             outStream = new ObjectOutputStream(clientSocket.getOutputStream());
             outStream.flush();
             inStream = new ObjectInputStream(clientSocket.getInputStream());
@@ -123,6 +123,9 @@ public class Multiplayer {
 
     }
 
+    // dies ist der Befehl für den Server, dass das Spiel zu Ende ist und die verwendeten Threads wieder freigegeben werden können.
+    // diese Nachricht kommt also nicht beim Gegner an sondern wird vom Server verschluckt.
+    // beide Clients senden diese Nachricht an den Server, egal wer gewinnt.
     public void sendWinMSGtoServer() throws Exception {
         sendPacket(new Packet("MSG", "WINNER"));
         this.die();

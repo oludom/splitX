@@ -6,7 +6,7 @@ import java.util.*;
  */
 
 /**
- * @author Soeren Wirries
+ * @author Soeren Wirries, Jahn Kuppinger, Micha Heiss
  *
  */
 public class BoardPoint implements Comparable<BoardPoint>, Serializable{

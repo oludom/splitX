@@ -17,7 +17,7 @@ import server.Packet;
 
 
 /**
- * @author Soeren Wirries
+ * @author Soeren Wirries, Jahn Kuppinger, Micha Heiss
  *
  */
 public class BasicUI {
@@ -211,7 +211,8 @@ public class BasicUI {
 			boolean first = init.DATA[2] == 1; // DATA2 is 1 if this player should move first
 
 			boolean run = true;
-			boolean color = false; // ich bin immer weiss
+			boolean mycolor = false; // wird angegeben durch Server
+			boolean color = false;
 			boolean winner = false;
 
 			String winningPhrase = "";
@@ -219,6 +220,7 @@ public class BasicUI {
 
 			if(first){
 
+				mycolor = true; // erster Zug von schwarz, also bin ich Spieler schwarz
 				dim = readBoardDim();
 				opponent.sendBoardDim(dim);
 				board = new Board(dim);
@@ -227,26 +229,27 @@ public class BasicUI {
 				prUIBuff();
 
 				// erster Zug
+				color = mycolor;
 				prln("Du bist am Zug!");
-				Stone stone = new Stone(readBP(),color);
+				Stone stone = new Stone(readBP(), color);
 				board.addStone(stone);
 				opponent.sendStone(stone);
-				color = true; // schwarz
 
 				prUIBuff();
 				board.draw();
 				prUIBuff();
 
 				// warte auf zwei Züge des Gegners
+				color = !mycolor;
 				for(int i = 0; i<2; i++){
 					prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
-					stone = opponent.recvStone(color); // schwarz
+					stone = opponent.recvStone(color); // weiß
 					board.addStone(stone);
 					prUIBuff();
 					board.draw();
 					prUIBuff();
 				}
-				color = false; // weiss
+				color = mycolor;
 
 
 
@@ -276,7 +279,7 @@ public class BasicUI {
 					prln(errorPhrase);
 					errorPhrase = "";
 					try {
-						if(color){
+						if(color == !mycolor){
 							prln("Dein Gegner ist am Zug! Warte bis er zwei Züge gemacht hat.");
 							Stone stone = opponent.recvStone(color);
 							board.addStone(stone);
@@ -288,7 +291,7 @@ public class BasicUI {
 						}
 						board.checkWinner();
 					}catch (GameWonException e) {
-						if(color){
+						if(color != mycolor){
 							winningPhrase = "Du hast verloren!";
 						}else {
 							winningPhrase = "Du hast gewonnen!";
