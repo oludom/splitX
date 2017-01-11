@@ -62,7 +62,7 @@ public class BasicUI {
 	}
 	
 	public BoardPoint readBP() throws StopGameException {
-		this.pr("Bitte Punkt angeben >");
+		this.pr("Bitte Punkt angeben (z.B. a1, b5) >");
 		String read = "";
 		BoardPoint bp = new BoardPoint("A", 1);
 		int yStart = 1;
