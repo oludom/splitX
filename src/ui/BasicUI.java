@@ -12,7 +12,6 @@ import client.NetworkException;
 import game.*;
 import ui.UiException.*;
 import game.GameException.*;
-import ki.Bot;
 import server.Packet;
 
 
@@ -170,21 +169,17 @@ public class BasicUI {
 		this.prln("Willkommen beim Spiel Connect6!");
 		prln("");
 		//TODO Regeln einfuegen
-		int auswahl = selectMenue(new String[]{"Spielmodus auswaehlen:","Singleplayer", "Singleplayer mit Bot",
-				"Multiplayer", "Bot vs Bot","Spiel verlassen"});
+		int auswahl = selectMenue(new String[]{"Spielmodus auswaehlen:","Singleplayer",
+				"Multiplayer","Spiel verlassen"});
 		
 		switch(auswahl){
 			case 1:
 				this.startSingle();
 				break;
-			case 2: 
-				this.startSingleBot();
-				break;
-			case 3:
+			case 2:
 				this.startMulti();
 				break;
-			case 4: startBot();
-			case 5: return false;
+			case 4: return false;
 			
 		}
 		return true;
@@ -448,249 +443,4 @@ public class BasicUI {
 		}
 	}
 
-	public void startSingleBot(){
-		prUIBuff();
-		int dim = readBoardDim();
-		board = new Board(dim);
-		prUIBuff();
-		boolean enableHardMode = false;
-		boolean enableLog = false;
-		int hardBot = selectMenue(new String[]{"Welche Stufe soll der dein Gegner haben?","Einfach","Schwer"});
-		switch (hardBot) {
-		case 1:
-			enableHardMode = false;
-			break;
-		case 2:
-			enableHardMode = true;
-			break;
-		}
-		prUIBuff();
-		int logBot = selectMenue(new String[]{"Sollen die Entscheidung des Bots angezeigt werden?","Nein","Ja"});
-		switch (logBot) {
-		case 1:
-			enableLog = false;
-			break;
-		case 2:
-			enableLog = true;
-			break;
-		}
-		prUIBuff();
-		int colorWahl = selectMenue(new String[]{"Welche Farbe moechtest du sein?","Schwarz","Weiss"});
-		prUIBuff();
-		board.draw();
-		prUIBuff();
-		prln("Schwarz beginnt mit dem ersten Zug.");
-		prln("");
-		boolean run = true;
-		boolean exception = false;
-		Bot bot = null;
-		boolean myColor = true;
-		switch(colorWahl){
-		case 1:
-			do{
-				try {
-					run = board.addStone(new Stone(readBP(),true));
-				} catch (BoardOutOfBoundException e) {
-					prln(e.toString());
-				}catch (StopGameException e) {
-					prln(e.toString());
-					exception = true;
-				}
-
-			}while(!run || exception);
-			myColor = true;
-			bot = new Bot(board, false,enableHardMode,enableLog);
-			break;
-		case 2:
-			myColor = false;
-			bot = new Bot(board, true, enableHardMode,enableLog);
-			bot.next();
-			break;
-		}
-
-		boolean color = false;
-
-		if(!exception){
-			board.draw();
-			prUIBuff();
-		}
-
-		String winningPhrase = "";
-		String errorPhrase = "";
-		while(run){
-			for(int i = 1; i <= 2; i++){
-				prln(errorPhrase);
-				errorPhrase = "";
-				try{
-					if(color){
-						prln("Schwarz ist am Zug.");
-						if(myColor){
-							board.addStone(new Stone(readBP(),color));
-						}else{
-							bot.next();
-						}
-
-					}else{
-						prln("Weiss ist am Zug.");
-
-						if(!myColor){
-							board.addStone(new Stone(readBP(),color));
-						}else{
-							bot.next();
-						}
-
-					}
-					board.checkWinner();
-
-				}catch (GameWonException e) {
-					winningPhrase = e.toString();
-					run = false;
-					break;
-				}catch (BoardOutOfBoundException e) {
-
-					errorPhrase = e.toString();
-					i--;
-
-				}catch(StopGameException e){
-
-					winningPhrase = e.toString();
-					run = false;
-					break;
-				}catch (Exception e) {
-
-					errorPhrase = e.toString();
-					i--;
-
-				}finally {
-					prUIBuff();
-					board.draw();
-					prUIBuff();
-				}
-
-			}
-			color = !color;
-		}
-		prUIBuff();
-		prln(winningPhrase);
-		prUIBuff();
-		
-		int wahl = selectMenue(new String[]{"Moechtest du nochmal Spielen?","Ja","Nein"});
-		switch(wahl){
-			case 1: startSingleBot();
-				break;
-			case 2:
-				break;
-		}
-	}
-
-	public void startBot(){
-		prUIBuff();
-		int dim = readBoardDim();
-		prUIBuff();
-		board = new Board(dim);
-		boolean enableHardMode1 = false;
-		boolean enableLog1 = false;
-
-		int hardBot1 = selectMenue(new String[]{"Welche Stufe soll der 1. Bot (schwarz) haben?","Einfach","Schwer"});
-		switch (hardBot1) {
-		case 1:
-			enableHardMode1 = false;
-			break;
-		case 2:
-			enableHardMode1 = true;
-			break;
-		}
-		prUIBuff();
-		int logBot1 = selectMenue(new String[]{"Sollen die Entscheidungen des 1. Bots (schwarz) angezeigt werden?","Nein","Ja"});
-		switch (logBot1) {
-		case 1:
-			enableLog1 = false;
-			break;
-		case 2:
-			enableLog1 = true;
-			break;
-		}
-		prUIBuff();
-		boolean enableHardMode2 = false;
-		boolean enableLog2 = false;
-		int hardBot2 = selectMenue(new String[]{"Welche Stufe soll der 2. Bot (weiss) haben?","Einfach","Schwer"});
-		switch (hardBot2) {
-		case 1:
-			enableHardMode2 = false;
-			break;
-		case 2:
-			enableHardMode2 = true;
-			break;
-		}
-		prUIBuff();
-		int logBot2 = selectMenue(new String[]{"Sollen die Entscheidungen des 2. Bots (weiss) angezeigt werden?","Nein","Ja"});
-		switch (logBot2) {
-		case 1:
-			enableLog2 = false;
-			break;
-		case 2:
-			enableLog2 = true;
-			break;
-		}
-		prUIBuff();
-		boolean color = false;
-
-		Bot blackBot = new Bot(board, true, enableHardMode1,enableLog1);
-		Bot whiteBot = new Bot(board, false, enableHardMode2,enableLog2);
-
-		boolean run = true;
-		String winningPhrase = "";
-		String errorPhrase = "";
-		blackBot.next();
-		int rounds = 1;
-		int move = 1;
-		while(run){
-			for(int i = 1; i <= 2; i++){
-				prln(errorPhrase);
-				errorPhrase = "";
-				try{
-					if(color){
-						prln("Black:"+rounds+"/"+move);
-						blackBot.next();
-					}else{
-						prln("White:"+rounds+"/"+move);
-						whiteBot.next();
-
-					}
-					board.checkWinner();
-
-				}catch (GameWonException e) {
-					winningPhrase = e.toString();
-					run = false;
-					break;
-
-				}catch (Exception e) {
-
-					errorPhrase = e.toString();
-					i--;
-
-				}finally {
-					prUIBuff();
-					board.draw();
-					prUIBuff();
-					move++;
-				}
-
-			}
-			color = !color;
-			rounds++;
-		}
-		prUIBuff();
-		board.draw();
-		prln(winningPhrase);
-		prUIBuff();
-
-		int wahl = selectMenue(new String[]{"Soll das Match wiederholt werden?","Ja","Nein"});
-		switch(wahl){
-			case 1: startBot();
-				break;
-			case 2: 
-				break;
-		}
-	}
 }

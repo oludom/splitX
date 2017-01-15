@@ -1,7 +1,6 @@
 package client;
 
 import game.Stone;
-import server.Server;
 import server.Packet;
 
 import java.io.*;
@@ -14,11 +13,12 @@ public class Multiplayer {
 
     private ObjectOutputStream outStream;
     private ObjectInputStream inStream;
+    public static final int PORT = 5325;
 
     public Multiplayer() throws NetworkException.ConnectionResetException{
 
         try{
-            Socket clientSocket = new Socket("192.168.1.1", Server.PORT); // TODO trage IP eines Servers ein, der dauerhaft online ist
+            Socket clientSocket = new Socket("192.168.1.1", Multiplayer.PORT); // TODO trage IP eines Servers ein, der dauerhaft online ist
             outStream = new ObjectOutputStream(clientSocket.getOutputStream());
             outStream.flush();
             inStream = new ObjectInputStream(clientSocket.getInputStream());
