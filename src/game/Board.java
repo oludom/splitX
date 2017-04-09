@@ -328,4 +328,7 @@ public class Board {
 		return blackStones;
 	}
 
+	public int getDimension() {
+		return dimension;
+	}
 }

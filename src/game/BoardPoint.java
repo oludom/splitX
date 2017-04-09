@@ -15,7 +15,7 @@ public class BoardPoint implements Comparable<BoardPoint>, Serializable{
 	 */
 	public String xPos; //Splaten-Position des Punktes (A - Z)
 	public int yPos; //Zeilen-Position des Punktes (1-20[unendlich])
-	private String[] alphabet = {"A", "B", "C", "D", "E", "F", "G","H","I","J", "K", "L","M", "N","O", "P","Q", "R", "S", "T", "U", "V", "W","X", "Y", "Z"};
+	protected static String[] alphabet = {"A", "B", "C", "D", "E", "F", "G","H","I","J", "K", "L","M", "N","O", "P","Q", "R", "S", "T", "U", "V", "W","X", "Y", "Z"};
 	
 	public BoardPoint(String xPos, int yPos){//Konstruktor
 		this.xPos = xPos.toUpperCase();//die xPos wird immer im UpperCase gespeichert
@@ -146,6 +146,14 @@ public class BoardPoint implements Comparable<BoardPoint>, Serializable{
 			return yPos -1;
 		}
 		return 1;
+	}
+
+	public int getX(){
+		return new String(String.join("", alphabet)).indexOf(xPos);
+	}
+
+	public static String getX(int pos){
+		return alphabet[pos];
 	}
 
 }
