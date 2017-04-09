@@ -8,6 +8,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -121,14 +122,52 @@ public class BasicUIX extends Application {
 
     private void setStone(int x, int y){
 
-        try{
-            board.addStone(new Stone(new BoardPoint(BoardPoint.getX(x),y), color));
-            render();
-            color = !color;
-        }catch (GameException.BoardOutOfBoundException e){
-            System.out.println(e.toString());
-        }
+        if(canvasEnabled){
+            String winningPhrase = "";
+            String errorPhrase = "";
 
+            try{
+                board.addStone(new Stone(new BoardPoint(BoardPoint.getX(x),y), color));
+                render();
+                color = !color;
+                board.checkWinner();
+            }catch (GameException.GameWonException e) {
+                canvasEnabled = false;
+                winningPhrase = e.toString();
+            }catch (GameException.BoardOutOfBoundException e) {
+                errorPhrase = e.toString();
+
+            }catch (GameException.BoardFullException e) {
+                canvasEnabled = false;
+                winningPhrase = e.toString();
+//        }catch (UiException.StopGameException e) {
+//            canvasEnabled = false;
+//            winningPhrase = e.toString();
+            }catch (Exception e) {
+
+                errorPhrase = e.toString();
+
+            }finally {
+                render();
+            }
+
+            if(!winningPhrase.equals("")){
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Spiel beendet!");
+                alert.setHeaderText(null);
+                alert.setContentText(winningPhrase);
+
+                alert.showAndWait();
+            }
+            if(!errorPhrase.equals("")){
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Fehler!");
+                alert.setHeaderText(null);
+                alert.setContentText(errorPhrase);
+
+                alert.showAndWait();
+            }
+        }
     }
 
     public void render(){
