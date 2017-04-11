@@ -295,18 +295,9 @@ public class Board {
 		for(Stone stone : allStones){
 			if(boardpoint.compareTo(stone.getPoint()) == 0) return false;
 		}
-		if(maxPoint.compareTo(boardpoint) < 1){
-			/**
-			 * wenn 0 dann ist es der maxPoint
-			 * wenn -1 dann ist er kleiner also innerhalb
-			 * wenn 1 dann ist er groesser also ausserhalb
-			 */
-			return true;
-		}
-		
-		return false;
-		
-	}
+        return maxPoint.compareTo(boardpoint) < 1;
+
+    }
 	
 	/**
 	 * setzt die Steine auf das Brett (field)

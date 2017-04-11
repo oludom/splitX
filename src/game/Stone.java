@@ -73,9 +73,8 @@ public class Stone {
 	 * gibt einen boolean zurueck, ob es einen Parent in dieser Position gibt
 	 */
 	public boolean hasParentTopLeft(){
-		if(parentTopLeft == null) return false;
-		return true;
-	}
+        return parentTopLeft != null;
+    }
 	
 	/**
 	 * @param stone
@@ -90,9 +89,8 @@ public class Stone {
 	 * gibt einen boolean zurueck, ob es einen Parent in dieser Position gibt
 	 */
 	public boolean hasParentTop(){
-		if(parentTop == null) return false;
-		return true;
-	}
+        return parentTop != null;
+    }
 	
 	/**
 	 * @param stone
@@ -107,9 +105,8 @@ public class Stone {
 	 * gibt einen boolean zurueck, ob es einen Parent in dieser Position gibt
 	 */
 	public boolean hasParentTopRight(){
-		if(parentTopRight == null) return false;
-		return true;
-	}
+        return parentTopRight != null;
+    }
 	
 	/**
 	 * @param stone
@@ -124,9 +121,8 @@ public class Stone {
 	 * gibt einen boolean zurueck, ob es einen Parent in dieser Position gibt
 	 */
 	public boolean hasParentLeft(){
-		if(parentLeft == null) return false;
-		return true;
-	}
+        return parentLeft != null;
+    }
 	
 	/**
 	 * @param stone
@@ -141,9 +137,8 @@ public class Stone {
 	 * gibt einen boolean zurueck, ob es einen Child in dieser Position hat
 	 */
 	public boolean hasChildBot(){
-		if(childBot == null) return false;
-		return true;
-	}
+        return childBot != null;
+    }
 	
 	/**
 	 * @param stone
@@ -164,9 +159,8 @@ public class Stone {
 	 * gibt einen boolean zurueck, ob es einen Child in dieser Position hat
 	 */
 	public boolean hasChildRight(){
-		if(childRight == null) return false;
-		return true;
-	}
+        return childRight != null;
+    }
 	
 	/**
 	 * @param stone
@@ -185,9 +179,8 @@ public class Stone {
 	 * gibt einen boolean zurueck, ob es einen Child in dieser Position hat
 	 */
 	public boolean hasChildBotRight(){
-		if(childBotRight == null) return false;
-		return true;
-	}
+        return childBotRight != null;
+    }
 	
 	/**
 	 * @param stone
@@ -207,9 +200,8 @@ public class Stone {
 	 * gibt einen boolean zurueck, ob es einen Child in dieser Position hat
 	 */
 	public boolean hasChildBotLeft(){
-		if(childBotLeft == null) return false;
-		return true;
-	}
+        return childBotLeft != null;
+    }
 	
 	/**
 	 * @param stone
