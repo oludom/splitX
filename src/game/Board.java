@@ -295,7 +295,8 @@ public class Board {
 		for(Stone stone : allStones){
 			if(boardpoint.compareTo(stone.getPoint()) == 0) return false;
 		}
-		if(maxPoint.compareTo(boardpoint) < 1){
+
+		if(maxPoint.compareTo(boardpoint) < 1 && new BoardPoint("A", 1).compareTo(boardpoint) >= 0){
 			/**
 			 * wenn 0 dann ist es der maxPoint
 			 * wenn -1 dann ist er kleiner also innerhalb
