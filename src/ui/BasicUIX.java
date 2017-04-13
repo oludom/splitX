@@ -270,7 +270,7 @@ public class BasicUIX extends Application {
         alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Bot 2");
         alert.setHeaderText(null);
-        alert.setContentText("Welche Stufe soll der 2. Bot (schwarz) haben?");
+        alert.setContentText("Welche Stufe soll der 2. Bot (weiß) haben?");
 
         buttonTypeE = new ButtonType("Einfach");
         buttonTypeS = new ButtonType("Schwer");
