@@ -311,6 +311,7 @@ public class Board {
 		return false;
 		
 	}
+
 	
 	/**
 	 * setzt die Steine auf das Brett (field)
