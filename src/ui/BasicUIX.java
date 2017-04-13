@@ -11,9 +11,13 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
 import javafx.stage.Stage;
 import ki.Bot;
 
@@ -41,7 +45,9 @@ public class BasicUIX extends Application {
     private double boxWidth;
     private double boardSize;
 
-    Timeline timer;
+    private Bot SinglePlayerBot;
+
+    private Timeline timer;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -56,6 +62,7 @@ public class BasicUIX extends Application {
         scene = new Scene(root, 1150, 1000);
         primaryStage.setScene(scene);
         root.setRight(getMenu_GameSelect());
+        scene.getStylesheets().add("css/styles.css");
 
         primaryStage.show();
 
@@ -75,7 +82,13 @@ public class BasicUIX extends Application {
                 double x = event.getX();
                 double y = event.getY();
 
-                drawHover(getFieldX(x), getFieldY(y), Color.GRAY);
+                Color hovercolor;
+                if(color){
+                    hovercolor = Color.rgb(0,0,0, .3);
+                }else {
+                    hovercolor = Color.rgb(255,255,255, .3);
+                }
+                drawHover(getFieldX(x), getFieldY(y), hovercolor);
             }
         });
         canvas.setOnMouseClicked(new javafx.event.EventHandler<MouseEvent>() {
@@ -116,6 +129,14 @@ public class BasicUIX extends Application {
         int dimensions = board.getDimension();
         boxWidth = boardSize/dimensions;
 
+        Image image = new Image("images/field.png");
+
+//        c.setFill(new RadialGradient(0, 0, boardSize/2+boardXPOS, boardSize/2+boardYPOS, boardSize, true,
+//                CycleMethod.REFLECT,
+//                new Stop(0.0, Color.rgb(221,240,255)),
+//                new Stop(1.0, Color.rgb(249,252,255))));
+//        c.fillRect(boardXPOS,boardYPOS, boardSize, boardSize);
+
         for(int i = 0; i<dimensions; i++){
             for(int j = 0; j<dimensions;j++){
                 if(j%2==0) {
@@ -132,6 +153,7 @@ public class BasicUIX extends Application {
                     }
                 }
                 c.fillRect(j*boxWidth+boardXPOS, i*boxWidth+boardYPOS, boxWidth, boxWidth);
+                c.drawImage(image, j*boxWidth+boardXPOS, i*boxWidth+boardYPOS, boxWidth, boxWidth);
             }
         }
 
@@ -194,7 +216,7 @@ public class BasicUIX extends Application {
         if(menu_GameSelect == null){
             menu_GameSelect = new VBox();
 
-            Label l = new Label("Menu");
+            Label l = new Label(" ");
             menu_GameSelect.getChildren().add(l);
 
             // create buttons for menu
@@ -205,6 +227,7 @@ public class BasicUIX extends Application {
                     startSingle();
                 }
             });
+            button.setId("button");
             menu_GameSelect.getChildren().add(button);
 
             button = new Button("1vBot");
@@ -214,6 +237,7 @@ public class BasicUIX extends Application {
                     startSingleBot();
                 }
             });
+            button.setId("button");
             menu_GameSelect.getChildren().add(button);
 
             button = new Button("Multiplayer");
@@ -223,6 +247,7 @@ public class BasicUIX extends Application {
                     startMulti();
                 }
             });
+            button.setId("button");
             menu_GameSelect.getChildren().add(button);
 
             button = new Button("BotvBot");
@@ -232,9 +257,11 @@ public class BasicUIX extends Application {
                     startBot();
                 }
             });
-
+            button.setId("button");
             menu_GameSelect.getChildren().add(button);
             menu_GameSelect.setMinWidth(150d);
+            menu_GameSelect.setSpacing(10);
+//            menu_GameSelect.setStyle("-fx-background-color: darkred");
 
         }
         return menu_GameSelect;
@@ -243,6 +270,7 @@ public class BasicUIX extends Application {
 
     private void startBot() {
 
+        canvasAllowUserInput = false;
         board = new Board(getBoardDimensions());
         boolean enableHardMode1 = false;
 
@@ -257,12 +285,15 @@ public class BasicUIX extends Application {
         alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
         Optional<ButtonType> result = alert.showAndWait();
 
-        if(result.get() == buttonTypeS){
-            enableHardMode1 = true;
-        } if (result.get() == buttonTypeE){
-            enableHardMode1 = false;
-        }else {
-            enableHardMode1 = false;
+
+        if (result.isPresent()) {
+            if(result.get() == buttonTypeS){
+                enableHardMode1 = true;
+            }else if (result.get() == buttonTypeE){
+                enableHardMode1 = false;
+            }else {
+                enableHardMode1 = false;
+            }
         }
 
 
@@ -294,7 +325,7 @@ public class BasicUIX extends Application {
         render();
 
 
-        timer = new Timeline(new KeyFrame(javafx.util.Duration.seconds(1d), new EventHandler<ActionEvent>() {
+        timer = new Timeline(new KeyFrame(javafx.util.Duration.seconds(.5d), new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 startBot(blackBot, whiteBot);
@@ -308,7 +339,6 @@ public class BasicUIX extends Application {
     private void startBot(Bot blackBot, Bot whiteBot){
 
 
-        boolean run = true;
         String winningPhrase = "";
         String errorPhrase = "";
 
@@ -319,7 +349,8 @@ public class BasicUIX extends Application {
                 alert.setHeaderText(null);
                 alert.setContentText(errorPhrase);
 
-                alert.showAndWait();
+                timer.stop();
+                alert.show();
             }
             errorPhrase = "";
             try{
@@ -365,6 +396,42 @@ public class BasicUIX extends Application {
     }
 
     private void startSingleBot() {
+
+        boolean enableHardMode = false;
+
+        gameType = GameType.BOT;
+        gameState = GameState.FIRSTMOVE;
+        board = new Board(getBoardDimensions());
+        canvasAllowUserInput = true;
+        render();
+        color = true;
+
+        //TODO tell user what to do
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("dein Gegner");
+        alert.setHeaderText(null);
+        alert.setContentText("Welche Stufe soll der Bot haben?");
+
+        ButtonType buttonTypeE = new ButtonType("Einfach");
+        ButtonType buttonTypeS = new ButtonType("Schwer");
+
+        alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
+        Optional<ButtonType> result = alert.showAndWait();
+
+
+        if (result.isPresent()) {
+            if(result.get() == buttonTypeS){
+                enableHardMode = true;
+            }else if (result.get() == buttonTypeE){
+                enableHardMode = false;
+            }else {
+                enableHardMode = false;
+            }
+        }
+
+        SinglePlayerBot = new Bot(board, false, enableHardMode, false);
+
 
     }
 
@@ -431,14 +498,15 @@ public class BasicUIX extends Application {
     private void setStone(int x, int y){
 
         if(canvasAllowUserInput){
-
+            String winningPhrase = "";
+            String errorPhrase = "";
             if (x >= 0 && y >= 0 && y < board.getDimension() && x <board.getDimension()) {
                 y++;//Muss für das Board in der Console herhöht werden
                 switch (gameType){
                     case SINGLEPLAYER:
 
-                        String winningPhrase = "";
-                        String errorPhrase = "";
+                        winningPhrase = "";
+                        errorPhrase = "";
 
                         try{
 
@@ -447,7 +515,6 @@ public class BasicUIX extends Application {
                             board.checkWinner();
 
                             gameState = GameState.values()[gameState.ordinal()+1];
-                            System.out.println(gameState);
                             if(gameState.ordinal() > GameState.BLACKSECOND.ordinal())
                                 gameState = GameState.WHITE;
                             if(gameState.equals(GameState.BLACK) || gameState.equals(GameState.BLACKSECOND))
@@ -488,13 +555,78 @@ public class BasicUIX extends Application {
 
                             alert.showAndWait();
                         }
+                        break;
+
+                    case BOT:
+
+                        winningPhrase = "";
+                        errorPhrase = "";
+
+                        try{
+
+                            if(gameState == GameState.FIRSTMOVE || gameState == GameState.BLACK || gameState == GameState.BLACKSECOND){
+                                color = true;
+                                board.addStone(new Stone(new BoardPoint(BoardPoint.getX(x),y), color));
+                                render();
+                                board.checkWinner();
+                                if(gameState == GameState.BLACKSECOND){
+                                    gameState = GameState.WHITE;
+                                }else{
+                                    gameState = GameState.values()[gameState.ordinal()+1];
+                                }
+
+                            }
+                            if(gameState == GameState.WHITE){
+                                // Bot moves
+
+                                color = false;
+                                SinglePlayerBot.next();
+                                SinglePlayerBot.next();
+                                board.checkWinner();
+                                gameState = GameState.BLACK;
+
+                            }
+
+                            //
+
+
+                        }catch (GameException.GameWonException e) {
+                            canvasAllowUserInput = false;
+                            winningPhrase = e.toString();
+                        }catch (GameException.BoardOutOfBoundException e) {
+                            errorPhrase = e.toString();
+
+                        }catch (GameException.BoardFullException e) {
+                            canvasAllowUserInput = false;
+                            winningPhrase = e.toString();
+                        }catch (Exception e) {
+                            errorPhrase = e.toString();
+                        }finally {
+                            render();
+                        }
+
+                        if(!winningPhrase.equals("")){
+                            canvasAllowUserInput = false;
+                            gameType = GameType.NONE;
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Spiel beendet!");
+                            alert.setHeaderText(null);
+                            alert.setContentText(winningPhrase);
+
+                            alert.showAndWait();
+                        }
+                        if(!errorPhrase.equals("")){
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Fehler!");
+                            alert.setHeaderText(null);
+                            alert.setContentText(errorPhrase);
+
+                            alert.showAndWait();
+                        }
 
                         break;
                 }
             }
-
         }
-
     }
-
 }

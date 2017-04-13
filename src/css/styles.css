@@ -1,0 +1,17 @@
+
+
+#button{
+    -fx-min-width: 150px;
+    -fx-min-height: 30px;
+    -fx-font-size: 18px;
+    -fx-border: none;
+    -fx-background-color: olive;
+    -fx-border-radius: 0px;
+}
+
+#button:hover{
+    -fx-background-color: olivedrab;
+}
+#button:pressed{
+    -fx-background-color: green;
+}
