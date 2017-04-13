@@ -30,7 +30,7 @@ public class BoardPoint implements Comparable<BoardPoint>, Serializable{
 	 */
 	@Override
 	public int compareTo(BoardPoint point) {
-		if(point.xPos.compareToIgnoreCase(this.xPos) > 0 || point.yPos > this.yPos) return 1;
+		if((point.xPos.compareToIgnoreCase(this.xPos) > 0 || point.yPos > this.yPos) && point.yPos >= 0) return 1;
 		if(point.xPos.compareToIgnoreCase(this.xPos) < 0 || point.yPos < this.yPos) return -1;
 		return 0;
 	}
@@ -133,7 +133,7 @@ public class BoardPoint implements Comparable<BoardPoint>, Serializable{
 	private String prevX(){
 
 		int i = Arrays.asList(alphabet).indexOf(xPos);
-		if(i == 0) return "A";
+		if(i == 0) return "Z";
 		return alphabet[i-1];
 	}
 
@@ -142,10 +142,10 @@ public class BoardPoint implements Comparable<BoardPoint>, Serializable{
 	}
 
 	private int prevY(){
-		if(yPos -1 > 0){
+//		if(yPos -1 >= 0){
 			return yPos -1;
-		}
-		return 1;
+//		}
+//		return 0;
 	}
 
 	public int getX(){

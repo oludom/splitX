@@ -150,6 +150,8 @@ public class BasicUIX extends Application {
             int y = b.yPos-1;
             drawStone(x,y,Color.WHITE);
         }
+        //TODO REMOVE
+//        board.draw();
 
     }
 
@@ -287,8 +289,8 @@ public class BasicUIX extends Application {
         }
         color = false;
 
-        Bot blackBot = new Bot(board, true, enableHardMode1,false);
-        Bot whiteBot = new Bot(board, false, enableHardMode2,false);
+        Bot blackBot = new Bot(board, true, enableHardMode1,true);
+        Bot whiteBot = new Bot(board, false, enableHardMode2,true);
 
         blackBot.next();
         render();
@@ -447,7 +449,8 @@ public class BasicUIX extends Application {
                             board.checkWinner();
 
                             gameState = GameState.values()[gameState.ordinal()+1];
-                            System.out.println(gameState);
+                            //TODO REMOVE
+//                            System.out.println(gameState);
                             if(gameState.ordinal() > GameState.BLACKSECOND.ordinal())
                                 gameState = GameState.WHITE;
                             if(gameState.equals(GameState.BLACK) || gameState.equals(GameState.BLACKSECOND))

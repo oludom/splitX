@@ -184,6 +184,7 @@ public class Board {
 	public int maxRowBlack(){
 		int row = 0;
 		for(Stone stone : blackStones){
+
 			if(!stone.hasParentTop()){
 				int temp = stone.countTopBot();
 				if(temp > row) row = temp;
@@ -259,7 +260,6 @@ public class Board {
 			oldStone.setParentTopRight(newStone);
 			newStone.setChildBotLeft(oldStone);
 		}
-		
 		if(newStone.getPoint().topleft().compareTo(oldStone.getPoint()) == 0){
 			newStone.setParentTopLeft(oldStone);
 			oldStone.setChildBotRight(newStone);
