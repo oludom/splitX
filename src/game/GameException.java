@@ -33,7 +33,7 @@ public class GameException extends Exception{
 		String errorMsg = "";
 		
 		public BoardOutOfBoundException(){
-			errorMsg = "Das Ziel befindet sich auserhalb des Spielfeldes!";
+			errorMsg = "Dieses Feld ist bereits belegt!";
 		}
 		
 		public String toString(){
