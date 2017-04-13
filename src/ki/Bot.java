@@ -233,6 +233,7 @@ public class Bot {
 					finalMap = addToLine(finalMap, ownStone, breakpoint,4);
 				}
 				runOverFlow++;//pro durchlauf wird er Overflow erhoeht (um Endlos-Schleifen zu unterbinden)
+				if(runOverFlow > 10) break;
 			}while(finalMap.size() == 0);//wenn min eine Moeglichkeit gefunden wurde
 		}
 		
@@ -466,6 +467,7 @@ public class Bot {
 		int yPos = 0;
 		boolean run = false;
 		Random random = new Random();
+		int runOverFlow = 0;
 		do{
 			xPos = random.nextInt(maxPos);//erzeugt Zufallszahl von 0 bis Grenze fuer x
 			yPos = random.nextInt(maxPos);//erzeugt Zufallszahl von 0 bis Grenze fuer y
@@ -478,9 +480,11 @@ public class Bot {
 				 */
 				run = board.addStone(new Stone(new BoardPoint(alphabet[xPos],yPos+1), color));
 			} catch (BoardOutOfBoundException e) {
-				System.out.println("Randompoint Exception");
-				
+				System.out.println("Randompoint Exception"+runOverFlow);
+				runOverFlow++;
+
 			}
+			if (runOverFlow >10) run = true;
 		}while(!run);
 		
 		

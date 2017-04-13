@@ -30,7 +30,7 @@ public class BoardPoint implements Comparable<BoardPoint>, Serializable{
 	 */
 	@Override
 	public int compareTo(BoardPoint point) {
-		if((point.xPos.compareToIgnoreCase(this.xPos) > 0 || point.yPos > this.yPos) && point.yPos >= 0) return 1;
+		if((point.xPos.compareToIgnoreCase(this.xPos) > 0 || point.yPos > this.yPos) && point.yPos > 0) return 1;
 		if(point.xPos.compareToIgnoreCase(this.xPos) < 0 || point.yPos < this.yPos) return -1;
 		return 0;
 	}

@@ -4,6 +4,7 @@ import game.*;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.*;
@@ -150,9 +151,6 @@ public class BasicUIX extends Application {
             int y = b.yPos-1;
             drawStone(x,y,Color.WHITE);
         }
-        //TODO REMOVE
-//        board.draw();
-
     }
 
     private enum GameState{
@@ -289,8 +287,8 @@ public class BasicUIX extends Application {
         }
         color = false;
 
-        Bot blackBot = new Bot(board, true, enableHardMode1,true);
-        Bot whiteBot = new Bot(board, false, enableHardMode2,true);
+        Bot blackBot = new Bot(board, true, enableHardMode1,false);
+        Bot whiteBot = new Bot(board, false, enableHardMode2,false);
 
         blackBot.next();
         render();
@@ -316,12 +314,19 @@ public class BasicUIX extends Application {
 
         for(int i = 1; i <= 2; i++){
             if(!errorPhrase.equals("")){
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Fehler!");
-                alert.setHeaderText(null);
-                alert.setContentText(errorPhrase);
+                final String phrase = errorPhrase;
 
-                alert.showAndWait();
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Fehler!");
+                        alert.setHeaderText(null);
+                        alert.setContentText(phrase);
+
+                        alert.showAndWait();
+                    }
+                });
             }
             errorPhrase = "";
             try{
@@ -339,14 +344,15 @@ public class BasicUIX extends Application {
                 winningPhrase = e.toString();
                 break;
 
+            }catch (GameException.BoardFullException e){
+                winningPhrase = e.toString();
+                break;
             }catch (Exception e) {
 
                 errorPhrase = e.toString();
                 i--;
 
-            }finally {
             }
-
         }
         color = !color;
         render();
