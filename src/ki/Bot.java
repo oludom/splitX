@@ -480,7 +480,7 @@ public class Bot {
 				 */
 				run = board.addStone(new Stone(new BoardPoint(alphabet[xPos],yPos+1), color));
 			} catch (BoardOutOfBoundException e) {
-				System.out.println("Randompoint Exception"+runOverFlow);
+
 				runOverFlow++;
 
 			}
