@@ -1,10 +1,10 @@
 *.class
-*.iml
 .classpath
 /bin
 .settings
 .gitignore
-.idea
+workspace.xml
+tasks.xml
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
