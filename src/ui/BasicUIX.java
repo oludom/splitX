@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.*;
+import javafx.geometry.NodeOrientation;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -16,7 +17,9 @@ import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import ki.Bot;
+import rmi_server.*;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -43,6 +46,10 @@ public class BasicUIX extends Application {
     private double boardSize;
 
     Timeline timer;
+
+    //Für Multiplayer
+    RmiTestClient rmiClient;
+    Timeline rederTimer;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -369,6 +376,21 @@ public class BasicUIX extends Application {
     }
 
     private void startMulti() {
+        rmiClient = new RmiTestClient(this);
+
+        try {
+            rmiClient.start(new Stage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        rederTimer = new Timeline(new KeyFrame(Duration.seconds(2), new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                render();
+            }
+        }));
+        rederTimer.setCycleCount(Timeline.INDEFINITE);
 
     }
 
@@ -408,7 +430,7 @@ public class BasicUIX extends Application {
         return "";
     }
 
-    private int getBoardDimensions() {
+    public int getBoardDimensions() {
         ArrayList<String> choices = new ArrayList<>();
         for(int i = 6; i<=20; i++) choices.add(""+i);
         String choice = getChoice("Brettgroesse", "Bitte waehle die Brettgroesse", "Seitenlaenge: ", choices);
@@ -442,11 +464,10 @@ public class BasicUIX extends Application {
 
             if (x >= 0 && y >= 0 && y < board.getDimension() && x <board.getDimension()) {
                 y++;//Muss für das Board in der Console herhöht werden
+                String winningPhrase = "";
+                String errorPhrase = "";
                 switch (gameType){
                     case SINGLEPLAYER:
-
-                        String winningPhrase = "";
-                        String errorPhrase = "";
 
                         try{
 
@@ -480,14 +501,7 @@ public class BasicUIX extends Application {
                         }
 
                         if(!winningPhrase.equals("")){
-                            canvasAllowUserInput = false;
-                            gameType = GameType.NONE;
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                            alert.setTitle("Spiel beendet!");
-                            alert.setHeaderText(null);
-                            alert.setContentText(winningPhrase);
-
-                            alert.showAndWait();
+                            setGameBrake(winningPhrase);
                         }
                         if(!errorPhrase.equals("")){
                             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -499,11 +513,102 @@ public class BasicUIX extends Application {
                         }
 
                         break;
+                    case MULTIPLAYER:
+
+                        try{
+                            boolean ableToPlay = false;
+                            board.checkWinner();
+
+                            if(gameState.ordinal() > GameState.BLACKSECOND.ordinal())
+                                gameState = GameState.WHITE;
+
+                            if((gameState.equals(GameState.BLACK) || gameState.equals(GameState.BLACKSECOND) ||
+                                    gameState.equals(GameState.FIRSTMOVE)) && color){
+                                ableToPlay = true;
+                            }
+                            if((gameState == GameState.WHITE || gameState == GameState.WHITESECOND) && !color){
+                                ableToPlay = true;
+                            }
+                            if (ableToPlay){
+                                Stone stone = new Stone(new BoardPoint(BoardPoint.getX(x),y), color);
+                                board.addStone(stone);
+                                render();
+                                rmiClient.sendStoneToServer(stone);
+                                gameState = GameState.values()[gameState.ordinal()+1];
+                                rmiClient.sendGameStateToServer(gameState.ordinal());
+                                board.checkWinner();
+                            }
+
+                        }catch (GameException.GameWonException e) {
+                            canvasAllowUserInput = false;
+                            rmiClient.sendGameWonToServer(color);
+                            winningPhrase = e.toString();
+                        }catch (GameException.BoardOutOfBoundException e) {
+                            rmiClient.sendBoardFullToServer();
+                            winningPhrase = e.toString();
+
+                        }catch (GameException.BoardFullException e) {
+                            canvasAllowUserInput = false;
+                            winningPhrase = e.toString();
+                        }catch (Exception e) {
+                            errorPhrase = e.toString();
+                        }finally {
+                            render();
+                        }
+
+                        if(!winningPhrase.equals("")){
+                            setGameBrake(winningPhrase);
+                        }
+
                 }
             }
 
         }
 
+    }
+
+    public void setBoard(Board board){
+        this.board = board;
+    }
+
+    public Board getBoard(){
+        return board;
+    }
+
+    public void startMultiGame(boolean color){
+        this.color = color;
+        rederTimer.play();
+        gameType = GameType.MULTIPLAYER;
+        if(color){
+            gameState = GameState.FIRSTMOVE;
+
+        }
+        canvasAllowUserInput = true;
+    }
+
+    public Stage getPrimaryStage(){
+        return primaryStage;
+    }
+
+    public void setGameState(int state){
+        gameState = GameState.values()[state];
+    }
+
+    public void setGameBrake(String text){
+        canvasAllowUserInput = false;
+        gameType = GameType.NONE;
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Spiel beendet!");
+                alert.setHeaderText(null);
+                alert.setContentText(text);
+                System.out.println("GameBrake");
+                alert.show();
+                Optional<ButtonType> type;
+            }
+        });
     }
 
 }

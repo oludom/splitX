@@ -24,7 +24,9 @@ public interface RmiServerInterface extends Remote, Serializable {
 
     int CNOTHING = 0;
     int CBORDDIM = 1;
-    int CGAMELOOSE = 2;
+    int CGAMEWINNER = 2;
+    int CGAMESTATE = 3;
+    int CBOARDFULL = 4;
 
     void addClient(String ip) throws RemoteException;
     void removeClient(String ip) throws RemoteException;

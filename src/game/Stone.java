@@ -5,11 +5,13 @@ package game;
  * 
  */
 
+import java.io.Serializable;
+
 /**
  * @author Soeren Wirries, Jahn Kuppinger, Micha Heiss
  *
  */
-public class Stone {
+public class Stone implements Serializable {
 	/***
 	 * Diese Klasse stellt einen Stein und die damit verbundene Logik dar
 	 * 

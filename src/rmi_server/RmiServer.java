@@ -30,6 +30,8 @@ public class RmiServer implements RmiServerInterface {
     private HashMap<Integer, ArrayList<Stone>> gameStones = new HashMap<>();
     private HashMap<Integer, int[]> gameControl = new HashMap<>();
     private int GAMEID = 1000;
+    private boolean runningInfo = true;
+    private boolean runningCleanup = true;
 
     @Override
     public void addClient(String ip) {
@@ -39,7 +41,18 @@ public class RmiServer implements RmiServerInterface {
         for(Object element : clientIPs){
             System.out.println("Clients: "+element);
         }
-        if(!infoThread.isAlive()) infoThread.start();
+        if(!infoThread.isAlive()){
+            System.out.println("Start InfoThread");
+            infoThread.setDaemon(true);
+            runningInfo = true;
+            infoThread.start();
+        }
+        if(!cleanupThread.isAlive()){
+            System.out.println("Start CleanUpThread");
+            runningCleanup = true;
+            cleanupThread.setDaemon(true);
+            cleanupThread.start();
+        }
 
     }
 
@@ -54,7 +67,7 @@ public class RmiServer implements RmiServerInterface {
     }
 
     @Override
-    public int countStones(int gameID) throws RemoteException {
+    public int countStones(int gameID) throws RemoteException, NullPointerException{
 
         return gameStones.get(gameID).size();
     }
@@ -105,7 +118,9 @@ public class RmiServer implements RmiServerInterface {
     @Override
     public String newRequest(String name) throws RemoteException {
         for(Map.Entry<String, String> entry : askedOpponents.entrySet()){
-            if(entry.getKey().equals(name)) return entry.getValue();
+            if(entry.getKey().equals(name)){
+                return entry.getValue();
+            }
         }
         return "";
     }
@@ -148,11 +163,17 @@ public class RmiServer implements RmiServerInterface {
     public void setRequestState(int id, int state) throws RemoteException {
         System.out.println("ID:"+id+" State:" +state);
         runningGames.replace(id,state);
+        if(state == RmiServerInterface.ACCEPT){
+            gameControl.put(id, new int[]{0,0});
+            gameStones.put(id, new ArrayList<>());
+        }
 
+        //TODO REMOVE
         String[] opponentNames = gameOpponents.get(id);
         for(String op : opponentNames){
             System.out.println("OppName:"+op);
         }
+
         askedOpponents.remove(opponentNames[0]);
 
     }
@@ -160,11 +181,20 @@ public class RmiServer implements RmiServerInterface {
     Thread infoThread = new Thread(new Runnable() {
         @Override
         public void run() {
-            while(true){
+            while(runningInfo){
                 System.out.println("\n\naskOpponents:"+askedOpponents);
                 System.out.println("runningGames:"+runningGames);
                 System.out.println("gameOpponents:"+gameOpponents);
-
+                for(Map.Entry<Integer, int[]> entry : gameControl.entrySet()){
+                    int[] control = entry.getValue();
+                    System.out.println("gameControl: "+entry.getKey() +" Command "+control[0]+"|"+control[1]);
+                }for(Map.Entry<Integer,ArrayList<Stone>> entry : gameStones.entrySet()){
+                    ArrayList<Stone> stones = entry.getValue();
+                    System.out.println("gameControl: "+entry.getKey());
+                    for(Stone s : stones){
+                        System.out.print("Stone:"+s.getPoint());
+                    }
+                }
                 try{
                     sleep(5000);
                 }catch (Exception e){
@@ -174,6 +204,33 @@ public class RmiServer implements RmiServerInterface {
 
 
         }
+    });
+
+    Thread cleanupThread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            while (runningCleanup) {
+                for(Map.Entry<Integer, Integer> entry : runningGames.entrySet()){
+                    if (entry.getValue() == 5){
+                        gameOpponents.remove(entry.getKey());
+                        gameControl.remove(entry.getKey());
+                        gameStones.remove(entry.getKey());
+                        runningGames.remove(entry.getKey());
+                    }
+                }
+                try {
+                    sleep(1000 * 60);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if(clientIPs.size() == 0){
+                    System.out.println("Thread werden beendet...");
+                    runningCleanup = false;
+                    runningInfo = false;
+                }
+            }
+        }
+
     });
 
 
