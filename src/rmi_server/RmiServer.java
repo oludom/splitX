@@ -63,6 +63,7 @@ public class RmiServer implements RmiServerInterface {
 
     @Override
     public ArrayList<String> getOpponentList() throws RemoteException {
+        //TODO Clienst die im Spiel sind nicht anzeigen.
         return clientIPs;
     }
 
@@ -224,7 +225,7 @@ public class RmiServer implements RmiServerInterface {
                     e.printStackTrace();
                 }
                 if(clientIPs.size() == 0){
-                    System.out.println("Thread werden beendet...");
+                    System.out.println("Threads werden beendet...");
                     runningCleanup = false;
                     runningInfo = false;
                 }

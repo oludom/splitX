@@ -9,7 +9,9 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
@@ -18,6 +20,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import ui.BasicUIX;
 
@@ -34,23 +37,26 @@ import static java.lang.Thread.sleep;
  *
  * @author SWirries
  */
-public class RmiTestClient extends Application{
+public class RmiClient extends Application{
 
     String host;
-    private Label connectionState = new Label("Nicht verbunden!");
-    private boolean state = false;
+    private Label labelConnectionState = new Label("Nicht verbunden!");
+
     private ObservableList opponents = FXCollections.observableArrayList();
     private ListView listView = new ListView();
     private RmiServerInterface rmiServerInterface;
     private TextField tfUserName = new TextField("Name");
     private TextField tfServerIP = new TextField("127.0.0.1");
-    private Label lableServerIp = new Label("Server IP:");
+    private Label labelServerIp = new Label("Server IP:");
     private Stage mainStage;
+
+    private boolean state = false;
     private boolean runningRequestThread = true;
     private boolean runningGameThread = true;
     private boolean dialogIsShowing = false;
     private boolean requestMode = false;
     private int gameID = 0;
+    private String noOpponentFound = "Keine Gegner auf dem Server vorhanden!";
 
     private int boardDimension = -1;
     private boolean gameBeginner = true;
@@ -76,10 +82,16 @@ public class RmiTestClient extends Application{
 //                    System.out.println("clients: "+o);
                     if(!o.equals(tfUserName.getText())) listView.getItems().add(o);
                 }
+                if (listView.getItems().size() == 0) {
+                    listView.getItems().add(noOpponentFound);
+                }
+                labelConnectionState.setText("Mit dem Server verbunden!");
+                labelConnectionState.setTextFill(Color.GREEN);
             }catch (Exception ex){
                 System.out.println("ServerVerbindungsError:" + ex);
                 if( errorRate > 10) tfUserName.setDisable(false);
-                connectionState.setText("Nicht verbunden!");
+                labelConnectionState.setText("Nicht verbunden!");
+                labelConnectionState.setTextFill(Color.RED);
             }
         }
     }));
@@ -87,11 +99,12 @@ public class RmiTestClient extends Application{
     /**
      * Thread für das Überprüfen von Anfragen sowie das annahmen der Anfragen
      */
-    private Thread requestThread = new Thread(new Runnable() {
+    private Runnable runnableRequest = new Runnable() {
         @Override
         public void run() {
             while (runningRequestThread){
                 try{
+                    //TODO REMOVE
                     System.out.println(tfUserName.getText()+" isShowing:"+dialogIsShowing + " requestMode: "+ requestMode);
                     if(!dialogIsShowing && !requestMode){
                         String name = rmiServerInterface.newRequest(tfUserName.getText());
@@ -107,20 +120,20 @@ public class RmiTestClient extends Application{
                                     infoDialog.setTitle("Anfrage");
                                     infoDialog.setHeaderText("Sie habe eine Anfrage zu einem Spiel erhalten.");
                                     infoDialog.setContentText(name + " hat Sie zu einem Spiel aufgefordert!");
-                                    infoDialog.setX(xWindowPos);
-                                    infoDialog.setY(yWindowPos);
+                                    //TODO Fensterpostition anpassen
+                                    infoDialog.setX(xWindowPos + infoDialog.getWidth() / 2);
+                                    infoDialog.setY(yWindowPos + infoDialog.getHeight() / 2);
 
                                     Optional<ButtonType> result = infoDialog.showAndWait();
                                     if(result.get() == ButtonType.OK){
 
                                         try {
                                             rmiServerInterface.setRequestState(gameID, RmiServerInterface.ACCEPT);
-                                            runningRequestThread = false;
+                                            stopRequestThread();
 
-                                            //TODO hier beginnt das Spiel
-                                            runningGameThread = true;
+                                            //hier beginnt das Spiel
                                             gameBeginner = false;
-                                            gameThread.start();
+                                            startGameThread();
 
                                         }catch (Exception e){
                                             System.out.println("DialogRMI Acc Error"+e);
@@ -163,18 +176,19 @@ public class RmiTestClient extends Application{
                                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                                     alert.setTitle("Anfrage");
                                     alert.setContentText("Anfrage wurde angenommen");
-                                    alert.setX(xWindowPos);
-                                    alert.setY(yWindowPos);
+                                    //TODO Fenster Position anpassen
+                                    System.out.println("Poition:"+mainStage.getX() + " | " + xWindowPos);
+                                    alert.setX(mainStage.getX() + alert.getWidth() /3);
+                                    alert.setY(mainStage.getY() + alert.getHeight() / 3);
                                     Optional<ButtonType> result = alert.showAndWait();
                                     if(result.get() == ButtonType.OK){
-                                        //TODO Aktionen anpassen
+
                                         try {
                                             rmiServerInterface.setRequestState(gameID,RmiServerInterface.RUNNING);
-                                            runningRequestThread = false;
+                                            stopRequestThread();
 
-                                            //TODO hier beginnt das Spiel
-                                            runningGameThread = true;
-                                            gameThread.start();
+                                            //hier beginnt das Spiel
+                                            startGameThread();
 
                                         } catch (RemoteException e) {
                                             e.printStackTrace();
@@ -216,12 +230,12 @@ public class RmiTestClient extends Application{
 
 
         }
-    });
+    };
 
     /**
-     * Thread für den Abruf der Steine vom Server
+     * Runnable für den Abruf der Steine vom Server
      */
-    private Thread gameThread = new Thread(new Runnable() {
+    private Runnable runnableGame=  new Runnable() {
         @Override
         public void run() {
            boolean checkBoardDim = false;
@@ -237,7 +251,8 @@ public class RmiTestClient extends Application{
                            @Override
                            public void run() {
                                dialogIsShowing = true;
-                               boardDimension = gameUI.getBoardDimensions();
+                               //TODO Fenster Position anpassen
+                               boardDimension = gameUI.getBoardDimensions(mainStage.getX() + 100,mainStage.getY() + 100);
                                gameUI.setBoard(new Board(boardDimension));
                                gameUI.startMultiGame(gameBeginner);
                            }
@@ -247,15 +262,13 @@ public class RmiTestClient extends Application{
                        } catch (InterruptedException e) {
                            e.printStackTrace();
                        }
-
-
                    }
                    try {
                        sleep(5000);
                    } catch (InterruptedException e) {
                        e.printStackTrace();
                    }finally {
-                       dialogIsShowing = false;
+//                       dialogIsShowing = false;
                    }
 
                    if (boardDimension > 5 && !checkBoardDim) {
@@ -268,19 +281,6 @@ public class RmiTestClient extends Application{
                            e.printStackTrace();
                        }
                    }
-
-                   /**
-                    * Methode um die einen Stein an der Server zu senden
-                    */
-//                   if(stoneCount == 0){
-//                       //TODO setzen des ersten Steins
-//                       try {
-//                           rmiServerInterface.setStone(gameID, new Stone(new BoardPoint("A",1),true));
-//                       } catch (RemoteException e) {
-//                           e.printStackTrace();
-//                       }
-//                   }
-
 
                }else if (!gameIsRunning){
                    //Spieler Weiß
@@ -295,9 +295,7 @@ public class RmiTestClient extends Application{
                        }
                        try {
                            if (gameControl[0] == RmiServerInterface.CBORDDIM) {
-
                                boardDimension = gameControl[1];
-                               System.out.println("BoardDim Weiß:"+boardDimension);
                                gameUI.setBoard(new Board(boardDimension));
                                gameUI.startMultiGame(gameBeginner);
                                gameIsRunning = true;
@@ -335,7 +333,7 @@ public class RmiTestClient extends Application{
                            ArrayList<Stone> allStones = rmiServerInterface.getStone(gameID, true);
                            int[] gameControl = rmiServerInterface.getGameControl(gameID);
                            stoneCount = allStones.size();
-                           //TODO Methode um die Steine dem Board hinzuzufügen
+
                            for(Stone stone : allStones){
                                if (gameUI.getBoard().checkPoint(stone.getPoint())){
                                    gameUI.getBoard().addStone(stone);
@@ -346,15 +344,19 @@ public class RmiTestClient extends Application{
                                gameUI.setGameState(gameControl[1]);
 
                            }else if(gameControl[0] == RmiServerInterface.CBOARDFULL){
-                               gameUI.setGameBrake("Alle Felder sind belegt. Das Spiel endet unentschieden.");
-                               runningGameThread = false;
+                               gameUI.setGameBrake("Alle Felder sind belegt. Das Spiel endet unentschieden.", true);
+                               stopGameThread();
+                               startRequestThread();
+                               connectionTimeline.play();
 
                            }else if(gameControl[0] == RmiServerInterface.CGAMEWINNER){
-                               runningGameThread = false;
+                               stopGameThread();
+                               startRequestThread();
+                               connectionTimeline.play();
                                if(gameControl[1] == 0){
-                                   gameUI.setGameBrake("Spieler Schwarz hat gewonnen!");
+                                   gameUI.setGameBrake("Spieler Schwarz hat gewonnen!", true);
                                }else{
-                                   gameUI.setGameBrake("Spieler Weiß hat gewonnen!");
+                                   gameUI.setGameBrake("Spieler Weiß hat gewonnen!", true);
                                }
                            }
                            sleepTime = 1500;
@@ -370,32 +372,15 @@ public class RmiTestClient extends Application{
                }
            }
         }
-    });
+    };
 
-   /* public static void main(String[] args) {
-        String host = "192.168.112.1";
-
-        try {
-            Registry registry = LocateRegistry.getRegistry(host);
-            RmiServerInterface iconnect6 = (RmiServerInterface) registry.lookup("Server");
-            String response = iconnect6.getOpponent();
-
-            System.out.println("Ausgabe: "+response);
-
-        }catch (Exception e){
-            System.out.println("Error: "+e);
-        }
-    }*/
-
-   public RmiTestClient(BasicUIX uix){
+    public RmiClient(BasicUIX uix){
        this.gameUI = uix;
    }
 
-
-
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle("Connect6 Client");
+        primaryStage.setTitle("Connect6 - MultiplayerClient");
         mainStage = primaryStage;
 
         StackPane root = new StackPane();
@@ -407,24 +392,28 @@ public class RmiTestClient extends Application{
         primaryStage.setY(yWindowPos);
 
         BorderPane borderPane = new BorderPane();
-        GridPane gridPane = new GridPane();
         GridPane topGridPane = new GridPane();
-        Button btnConntect = new Button("Connect");
+        Button btnConnect = new Button("Connect");
         Button btnDisconnect = new Button("Disconnect");
+        Label labelState  = new Label("Verbindunsstatus:");
+        Label labelUsername = new Label("Benutzername:");
 
-        borderPane.setBottom(gridPane);
         borderPane.setCenter(listView);
         borderPane.setTop(topGridPane);
+        borderPane.setPadding(new Insets(10,10,10,10));
+        borderPane.setMargin(listView, new Insets(10,0,0,0));
 
-        gridPane.add(tfUserName,1,1);
-        gridPane.add(btnConntect, 1,2);
-        gridPane.add(btnDisconnect, 2, 2);
+        topGridPane.add(labelUsername, 1,1);
+        topGridPane.add(tfUserName,2,1);
+        topGridPane.add(labelServerIp, 1, 2);
+        topGridPane.add(tfServerIP, 2, 2);
+        topGridPane.add(btnConnect, 1,3);
+        topGridPane.add(btnDisconnect,2,3);
+        topGridPane.add(labelState,3,3);
+        topGridPane.add(labelConnectionState, 4,3);
+        topGridPane.setHgap(5);
+        topGridPane.setVgap(10);
 
-        topGridPane.add(lableServerIp, 1, 1);
-        topGridPane.add(tfServerIP, 2, 1);
-        topGridPane.add(connectionState, 3,1);
-
-        opponents.add("Nicht verbunden!");
         listView.setItems(opponents);
         tfUserName.setText(System.getProperty("user.name"));
 
@@ -432,7 +421,7 @@ public class RmiTestClient extends Application{
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        btnConntect.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        btnConnect.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 connectToServer();
@@ -452,13 +441,23 @@ public class RmiTestClient extends Application{
                 String clickedName = (String) listView.getSelectionModel().getSelectedItem();
                 System.out.println("Clicked:" +clickedName);
                 try{
-                    if (clickedName != null) {
+                    if (clickedName != null && !clickedName.equals(noOpponentFound)) {
                         gameID = rmiServerInterface.requestOpponent(tfUserName.getText(), clickedName);
                         requestMode = true;
                     }
                 }catch (Exception ex){
                     System.out.println("ListClickeError:"+ex);
                 }
+            }
+        });
+
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                disconnectFromServer();
+                stopGameThread();
+                stopRequestThread();
+                connectionTimeline.stop();
             }
         });
 
@@ -509,23 +508,25 @@ public class RmiTestClient extends Application{
 
             rmiServerInterface.addClient(tfUserName.getText());
 
-            connectionState.setText("Mit dem Server verbunden!");
-            connectionState.setTextFill(Color.GREEN);
+            labelConnectionState.setText("Mit dem Server verbunden!");
+            labelConnectionState.setTextFill(Color.GREEN);
             state = true;
             tfUserName.setDisable(true);
+            tfServerIP.setDisable(true);
+            //TODO REMOVE
+            System.out.println("connection: "+connectionTimeline.getStatus());
 
             connectionTimeline.setCycleCount(Timeline.INDEFINITE);
-//            runningGameTimeline.setCycleCount(Timeline.INDEFINITE);
-
             connectionTimeline.play();
-//            runningGameTimeline.play();
-            requestThread.start();
+            startRequestThread();
+            //TODO REMOVE
+            System.out.println("connection: "+connectionTimeline.getStatus());
 
         }catch (Exception e){
             System.out.println("Connect Error: "+e);
             if(e.toString().contains("Connection refused")){
-                connectionState.setText("Server nicht erreichbar!");
-                connectionState.setTextFill(Color.RED);
+                labelConnectionState.setText("Server nicht erreichbar!");
+                labelConnectionState.setTextFill(Color.RED);
             }
         }
     }
@@ -533,18 +534,26 @@ public class RmiTestClient extends Application{
     private void disconnectFromServer(){
         if(state){
             try {
+                if(gameID != 0) rmiServerInterface.setRequestState(gameID, RmiServerInterface.FINISH);
                 rmiServerInterface.removeClient(tfUserName.getText());
                 tfUserName.setDisable(false);
-                connectionState.setText("Nicht verbunden!");
-
-                connectionTimeline.stop();
-                runningRequestThread = false;
-                runningGameThread = false;
-
-                listView.getItems().clear();
+                tfServerIP.setDisable(false);
+                labelConnectionState.setText("Nicht verbunden!");
+                gameID = 0;
             }catch (Exception e){
                 System.out.println("Discconect Error: "+e);
+            }finally {
+                listView.getItems().clear();
+                try {
+                    connectionTimeline.stop();
+                    stopRequestThread();
+                    stopGameThread();
+                }catch (Exception e){
+                    System.out.println("StopThread Error: "+e);
+                }
             }
+
+
         }
     }
 
@@ -554,10 +563,30 @@ public class RmiTestClient extends Application{
             public void run() {
                 try {
                     mainStage.toBack();
+                    gameUI.getPrimaryStage().toFront();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
+    }
+
+    private void startRequestThread(){
+        dialogIsShowing = false;
+        runningRequestThread = true;
+        new Thread(runnableRequest).start();
+    }
+
+    private void stopRequestThread(){
+        runningRequestThread = false;
+    }
+
+    private void startGameThread(){
+        runningGameThread = true;
+        new Thread(runnableGame).start();
+    }
+
+    private void stopGameThread(){
+        runningGameThread = false;
     }
 }

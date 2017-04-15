@@ -8,7 +8,6 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.*;
-import javafx.geometry.NodeOrientation;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -48,8 +47,10 @@ public class BasicUIX extends Application {
     Timeline timer;
 
     //Für Multiplayer
-    RmiTestClient rmiClient;
+    RmiClient rmiClient;
     Timeline rederTimer;
+    private double xWindowPos;
+    private double yWindowPos;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -67,6 +68,9 @@ public class BasicUIX extends Application {
 
         primaryStage.show();
 
+        xWindowPos = primaryStage.getX() + scene.getWidth() /2;
+        yWindowPos = primaryStage.getY() + scene.getHeight() /3;
+
         scene.widthProperty().addListener(new ChangeListener<Number>() {
             @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
                 render();
@@ -82,7 +86,7 @@ public class BasicUIX extends Application {
             public void handle(MouseEvent event) {
                 double x = event.getX();
                 double y = event.getY();
-
+                //TODO Hoverfarbe anpassen MuliPlayer red/green single: schwarz weiß
                 drawHover(getFieldX(x), getFieldY(y), Color.GRAY);
             }
         });
@@ -250,7 +254,7 @@ public class BasicUIX extends Application {
 
     private void startBot() {
 
-        board = new Board(getBoardDimensions());
+        board = new Board(getBoardDimensions(xWindowPos,yWindowPos));
         boolean enableHardMode1 = false;
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -376,7 +380,7 @@ public class BasicUIX extends Application {
     }
 
     private void startMulti() {
-        rmiClient = new RmiTestClient(this);
+        rmiClient = new RmiClient(this);
 
         try {
             rmiClient.start(new Stage());
@@ -402,7 +406,7 @@ public class BasicUIX extends Application {
 
         gameType = GameType.SINGLEPLAYER;
         gameState = GameState.FIRSTMOVE;
-        board = new Board(getBoardDimensions());
+        board = new Board(getBoardDimensions(xWindowPos,yWindowPos));
         canvasAllowUserInput = true;
         render();
         color = true;
@@ -418,23 +422,27 @@ public class BasicUIX extends Application {
         c.fillOval(x*boxWidth+boardXPOS, y*boxWidth+boardYPOS, boxWidth, boxWidth);
     }
 
-    private String getChoice(String title, String header, String content, ArrayList<String> choices){
+    private String getChoice(String title, String header, String content, ArrayList<String> choices, double xPosition, double yPosition){
 
         ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
         dialog.setTitle(title);
         dialog.setHeaderText(header);
         dialog.setContentText(content);
+        if((xPosition != 0) && (yPosition != 0)){
+            dialog.setX(xPosition);
+            dialog.setY(yPosition);
+        }
 
         Optional<String> result = dialog.showAndWait();
         if(result.isPresent())return result.get();
         return "";
     }
 
-    public int getBoardDimensions() {
+    public int getBoardDimensions(double xPosition, double yPosition) {
         ArrayList<String> choices = new ArrayList<>();
         for(int i = 6; i<=20; i++) choices.add(""+i);
-        String choice = getChoice("Brettgroesse", "Bitte waehle die Brettgroesse", "Seitenlaenge: ", choices);
-        if(choice == "") return getBoardDimensions();
+        String choice = getChoice("Brettgroesse", "Bitte waehle die Brettgroesse", "Seitenlaenge: ", choices,xPosition,yPosition);
+        if(choice == "") return getBoardDimensions(xPosition,yPosition);
         else return Integer.parseInt(choice);
     }
 
@@ -501,15 +509,16 @@ public class BasicUIX extends Application {
                         }
 
                         if(!winningPhrase.equals("")){
-                            setGameBrake(winningPhrase);
+                            setGameBrake(winningPhrase, true);
                         }
                         if(!errorPhrase.equals("")){
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                            alert.setTitle("Fehler!");
-                            alert.setHeaderText(null);
-                            alert.setContentText(errorPhrase);
-
-                            alert.showAndWait();
+//                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//                            alert.setTitle("Fehler!");
+//                            alert.setHeaderText(null);
+//                            alert.setContentText(errorPhrase);
+//
+//                            alert.showAndWait();
+                            setGameBrake(errorPhrase, false);
                         }
 
                         break;
@@ -544,12 +553,14 @@ public class BasicUIX extends Application {
                             rmiClient.sendGameWonToServer(color);
                             winningPhrase = e.toString();
                         }catch (GameException.BoardOutOfBoundException e) {
-                            rmiClient.sendBoardFullToServer();
-                            winningPhrase = e.toString();
+                            errorPhrase = e.toString();
 
                         }catch (GameException.BoardFullException e) {
                             canvasAllowUserInput = false;
                             winningPhrase = e.toString();
+                            rmiClient.sendBoardFullToServer();
+                        }catch (NullPointerException e){
+
                         }catch (Exception e) {
                             errorPhrase = e.toString();
                         }finally {
@@ -557,7 +568,10 @@ public class BasicUIX extends Application {
                         }
 
                         if(!winningPhrase.equals("")){
-                            setGameBrake(winningPhrase);
+                            setGameBrake(winningPhrase, true);
+                        }
+                        if(!errorPhrase.equals("")){
+                            setGameBrake(errorPhrase, false);
                         }
 
                 }
@@ -594,19 +608,24 @@ public class BasicUIX extends Application {
         gameState = GameState.values()[state];
     }
 
-    public void setGameBrake(String text){
-        canvasAllowUserInput = false;
-        gameType = GameType.NONE;
+    public void setGameBrake(String text, boolean stop){
+        final String dialogText;
+        if (stop) {
+            canvasAllowUserInput = false;
+            gameType = GameType.NONE;
+            dialogText = new String("Spiel beendet!");
+        }else {
+            dialogText = new String("Fehler!");
+        }
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Spiel beendet!");
+                alert.setTitle(dialogText);
                 alert.setHeaderText(null);
                 alert.setContentText(text);
-                System.out.println("GameBrake");
+                System.out.println("GameBrake "+stop);
                 alert.show();
-                Optional<ButtonType> type;
             }
         });
     }
