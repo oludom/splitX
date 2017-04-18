@@ -34,9 +34,13 @@ public class RmiServer implements RmiServerInterface {
     private boolean runningCleanup = true;
 
     @Override
-    public void addClient(String ip) {
+    public void addClient(String name) throws  RemoteException{
 
-        clientIPs.add(ip);
+
+        for(String clientName : clientIPs){
+            if(clientName.equalsIgnoreCase(name)) throw new RemoteException("Der Username wird Bereits verwendet. Bitte Neuen wählen");
+        }
+        clientIPs.add(name);
 
         for(Object element : clientIPs){
             System.out.println("Clients: "+element);

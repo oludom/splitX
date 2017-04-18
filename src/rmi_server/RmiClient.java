@@ -9,7 +9,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -39,7 +38,6 @@ import static java.lang.Thread.sleep;
  */
 public class RmiClient extends Application{
 
-    String host;
     private Label labelConnectionState = new Label("Nicht verbunden!");
 
     private ObservableList opponents = FXCollections.observableArrayList();
@@ -64,6 +62,12 @@ public class RmiClient extends Application{
     private double xWindowPos;
     private double yWindowPos;
 
+    private boolean enableLog = false;
+    private RmiClientLog clientLog = new RmiClientLog(this);
+    private String logInfo = "INFO: ";
+    private String logError = "ERROR: ";
+    private String logException = "Exception: ";
+
     BasicUIX gameUI;
 
     /**
@@ -87,8 +91,14 @@ public class RmiClient extends Application{
                 }
                 labelConnectionState.setText("Mit dem Server verbunden!");
                 labelConnectionState.setTextFill(Color.GREEN);
-            }catch (Exception ex){
-                System.out.println("ServerVerbindungsError:" + ex);
+            }catch (Exception e){
+                errorRate++;
+                if(enableLog) {
+                    String logText = logException + "Beim Abfragen der Gegnerliste vom Server - "+e;
+                    System.out.println(logText);
+                    clientLog.addLogItem(logText);
+                    e.printStackTrace();
+                }
                 if( errorRate > 10) tfUserName.setDisable(false);
                 labelConnectionState.setText("Nicht verbunden!");
                 labelConnectionState.setTextFill(Color.RED);
@@ -104,8 +114,12 @@ public class RmiClient extends Application{
         public void run() {
             while (runningRequestThread){
                 try{
-                    //TODO REMOVE
-                    System.out.println(tfUserName.getText()+" isShowing:"+dialogIsShowing + " requestMode: "+ requestMode);
+
+                    if(enableLog){
+                        String logText = logInfo + tfUserName.getText()+" isShowing:"+dialogIsShowing + " requestMode: "+ requestMode;
+                        System.out.println(logText);
+                        clientLog.addLogItem(logText);
+                    }
                     if(!dialogIsShowing && !requestMode){
                         String name = rmiServerInterface.newRequest(tfUserName.getText());
 
@@ -120,9 +134,9 @@ public class RmiClient extends Application{
                                     infoDialog.setTitle("Anfrage");
                                     infoDialog.setHeaderText("Sie habe eine Anfrage zu einem Spiel erhalten.");
                                     infoDialog.setContentText(name + " hat Sie zu einem Spiel aufgefordert!");
-                                    //TODO Fensterpostition anpassen
-                                    infoDialog.setX(xWindowPos + infoDialog.getWidth() / 2);
-                                    infoDialog.setY(yWindowPos + infoDialog.getHeight() / 2);
+                                    //Fensterpostition anpassen
+                                    //infoDialog.setX(xWindowPos + infoDialog.getWidth() / 2);
+                                    //infoDialog.setY(yWindowPos + infoDialog.getHeight() / 2);
 
                                     Optional<ButtonType> result = infoDialog.showAndWait();
                                     if(result.get() == ButtonType.OK){
@@ -136,11 +150,18 @@ public class RmiClient extends Application{
                                             startGameThread();
 
                                         }catch (Exception e){
-                                            System.out.println("DialogRMI Acc Error"+e);
-                                            e.printStackTrace();
+                                            if(enableLog){
+                                                String logText = logException + "Dialog RMI-Anfrage OK-Button -" + e;
+                                                clientLog.addLogItem(logText);
+                                                e.printStackTrace();
+                                            }
                                         }finally {
                                             dialogIsShowing = false;
-                                            System.out.println("Game wurde angenommen");
+                                            if(enableLog){
+                                                String logText = logInfo + "Das Spiel wird angenommen";
+                                                System.out.println(logText);
+                                                clientLog.addLogItem(logText);
+                                            }
                                         }
                                     }else{
 
@@ -148,11 +169,18 @@ public class RmiClient extends Application{
                                             rmiServerInterface.setRequestState(gameID, RmiServerInterface.DECLINED);
 
                                         }catch (Exception e){
-                                            System.out.println("DialogRMI Dec Error"+e);
-                                            e.printStackTrace();
+                                            if(enableLog){
+                                                String logText = logException + "Dialog RMI-Anfrage Abbrechen-Button -" + e;
+                                                clientLog.addLogItem(logText);
+                                                e.printStackTrace();
+                                            }
                                         }finally {
                                             dialogIsShowing = false;
-                                            System.out.println("Game wurde abgelehnt");
+                                            if(enableLog) {
+                                                String logText = logInfo + "Das Spiel wird abgelehnt";
+                                                System.out.println(logText);
+                                                clientLog.addLogItem(logText);
+                                            }
                                         }
                                     }
                                 }
@@ -164,8 +192,12 @@ public class RmiClient extends Application{
                         int state = -1;
                         try{
                             state = rmiServerInterface.getRequestState(gameID);
-                        }catch (Exception ex){
-                            ex.printStackTrace();
+                        }catch (Exception e){
+                            if(enableLog) {
+                                String logText = logException + "Beim Abfragen des Status der Anfrage - Status: "+state+" - "+e;
+                                System.out.println(logText);
+                                clientLog.addLogItem(logText);
+                            }
                         }
 
                         if(state == RmiServerInterface.ACCEPT){
@@ -176,10 +208,10 @@ public class RmiClient extends Application{
                                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                                     alert.setTitle("Anfrage");
                                     alert.setContentText("Anfrage wurde angenommen");
-                                    //TODO Fenster Position anpassen
-                                    System.out.println("Poition:"+mainStage.getX() + " | " + xWindowPos);
-                                    alert.setX(mainStage.getX() + alert.getWidth() /3);
-                                    alert.setY(mainStage.getY() + alert.getHeight() / 3);
+                                    //Fenster Position anpassen
+                                    //System.out.println("Poition:"+mainStage.getX() + " | " + xWindowPos);
+                                    //alert.setX(mainStage.getX() + alert.getWidth() /3);
+                                    //alert.setY(mainStage.getY() + alert.getHeight() / 3);
                                     Optional<ButtonType> result = alert.showAndWait();
                                     if(result.get() == ButtonType.OK){
 
@@ -191,7 +223,12 @@ public class RmiClient extends Application{
                                             startGameThread();
 
                                         } catch (RemoteException e) {
-                                            e.printStackTrace();
+                                            if(enableLog) {
+                                                String logText = logException + "Beim Setzen des Status auf RUNNING - "+e;
+                                                System.out.println(logText);
+                                                clientLog.addLogItem(logText);
+                                                e.printStackTrace();
+                                            }
                                         }
                                         runningRequestThread = false;
                                         connectionTimeline.stop();
@@ -222,8 +259,33 @@ public class RmiClient extends Application{
                     }
 
                     sleep(2000);
-                }catch (Exception ex){
-                    System.out.println("runningGameError:"+ex);
+                }catch (Exception e){
+                    if(!enableLog) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    clientLog.start(new Stage());
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                }
+                                String logText = logError + "Allgemeiner Fehler bei der Prüfung von Abfragen auf dem Server." +
+                                        "\nBitte Starten Sie das Programm und/oder den Server neu!\n"+e;
+                                clientLog.addLogItem(logText);
+                            }
+                        });
+                        stopRequestThread();
+                        stopGameThread();
+                        connectionTimeline.stop();
+                    }
+                    if(enableLog){
+                        String logText = logError + "Allgemeiner Fehler bei der Prüfung von Abfragen auf dem Server." +
+                                "\nBitte Starten Sie das Programm oder den Server neu!\n"+e;
+                        System.out.println(logText);
+                        clientLog.addLogItem(logText);
+                        e.printStackTrace();
+                    }
+
                 }
 
             }
@@ -244,7 +306,6 @@ public class RmiClient extends Application{
 
                if (gameBeginner && !gameIsRunning){
                    //Spieler Schwarz
-
                    if(boardDimension < 6 && !dialogIsShowing){
 
                        Platform.runLater(new Runnable() {
@@ -260,16 +321,20 @@ public class RmiClient extends Application{
                        try {
                            sleep(5000);
                        } catch (InterruptedException e) {
-                           e.printStackTrace();
+                           if(enableLog) {
+                               String logText = logException + "Beim Sleep des Threads nach Abfrage der Boardgröße - "+e;
+                               System.out.println(logText);
+                               clientLog.addLogItem(logText);
+                               e.printStackTrace();
+                           }
                        }
                    }
-                   try {
-                       sleep(5000);
-                   } catch (InterruptedException e) {
-                       e.printStackTrace();
-                   }finally {
-//                       dialogIsShowing = false;
-                   }
+                   //TODO ANPASSEN
+//                   try {
+//                       sleep(1000);
+//                   } catch (InterruptedException e) {
+//                       e.printStackTrace();
+//                   }
 
                    if (boardDimension > 5 && !checkBoardDim) {
                        try {
@@ -278,7 +343,12 @@ public class RmiClient extends Application{
                            gameIsRunning = true;
                            toBack();
                        } catch (RemoteException e) {
-                           e.printStackTrace();
+                           if(enableLog) {
+                               String logText = logException + "Beim Übertragen der Brettgröße an den Server - "+e;
+                               System.out.println(logText);
+                               clientLog.addLogItem(logText);
+                               e.printStackTrace();
+                           }
                        }
                    }
 
@@ -289,7 +359,12 @@ public class RmiClient extends Application{
                        try {
                             gameControl = rmiServerInterface.getGameControl(gameID);
                        } catch (RemoteException e) {
-                           e.printStackTrace();
+                           if(enableLog) {
+                               String logText = logException + "Beim Abfragen der Brettgröße vom Server - "+e;
+                               System.out.println(logText);
+                               clientLog.addLogItem(logText);
+                               e.printStackTrace();
+                           }
                        }catch (NullPointerException e){
 
                        }
@@ -302,8 +377,12 @@ public class RmiClient extends Application{
                                toBack();
                            }
                        } catch (Exception e) {
-                           System.out.println("Exeption in Spieler Weiß BoardDim");
-                           e.printStackTrace();
+                           if(enableLog) {
+                               String logText = logException + "Beim Setzen der Brettgröße - "+e;
+                               System.out.println(logText);
+                               clientLog.addLogItem(logText);
+                               e.printStackTrace();
+                           }
                            try {
                                sleep(5000);
                            } catch (InterruptedException e1) {
@@ -322,10 +401,14 @@ public class RmiClient extends Application{
                        //Prüfen ob neue Steine vorhanden
                        serverStoneCount = rmiServerInterface.countStones(gameID);
                    } catch (RemoteException e) {
-                       e.printStackTrace();
+                       if(enableLog) {
+                           String logText = logException + "Beim Abfragen der Steinanzahl von Server - "+e;
+                           System.out.println(logText);
+                           clientLog.addLogItem(logText);
+                           e.printStackTrace();
+                       }
                    }catch (NullPointerException e){
-//                       e.printStackTrace();
-                       System.out.println("NullPointer in countStone");
+
                    }
                    int sleepTime = 5000;
                    if(stoneCount <= serverStoneCount){
@@ -360,14 +443,19 @@ public class RmiClient extends Application{
                                }
                            }
                            sleepTime = 1500;
-                       }catch (Exception ex){
-                           ex.printStackTrace();
+                       }catch (Exception e){
+                           if(enableLog) {
+                               String logText = logException + "Beim Abfragen der Steine vom Server- "+e;
+                               System.out.println(logText);
+                               clientLog.addLogItem(logText);
+                               e.printStackTrace();
+                           }
                        }
                    }
                    try {
                        sleep(sleepTime);
                    } catch (InterruptedException e) {
-                       e.printStackTrace();
+
                    }
                }
            }
@@ -395,6 +483,7 @@ public class RmiClient extends Application{
         GridPane topGridPane = new GridPane();
         Button btnConnect = new Button("Connect");
         Button btnDisconnect = new Button("Disconnect");
+        Button btnClientLog  = new Button("Log öffnen");
         Label labelState  = new Label("Verbindunsstatus:");
         Label labelUsername = new Label("Benutzername:");
 
@@ -411,6 +500,7 @@ public class RmiClient extends Application{
         topGridPane.add(btnDisconnect,2,3);
         topGridPane.add(labelState,3,3);
         topGridPane.add(labelConnectionState, 4,3);
+        topGridPane.add(btnClientLog, 5, 3);
         topGridPane.setHgap(5);
         topGridPane.setVgap(10);
 
@@ -418,7 +508,6 @@ public class RmiClient extends Application{
         tfUserName.setText(System.getProperty("user.name"));
 
         root.getChildren().add(borderPane);
-        primaryStage.setScene(scene);
         primaryStage.show();
 
         btnConnect.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -435,18 +524,34 @@ public class RmiClient extends Application{
             }
         });
 
+        btnClientLog.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                openClientLog();
+            }
+        });
+
         listView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 String clickedName = (String) listView.getSelectionModel().getSelectedItem();
-                System.out.println("Clicked:" +clickedName);
+                if(enableLog) {
+                    String logText = logInfo + "Clicked:" +clickedName;
+                    System.out.println(logText);
+                    clientLog.addLogItem(logText);
+                }
                 try{
                     if (clickedName != null && !clickedName.equals(noOpponentFound)) {
                         gameID = rmiServerInterface.requestOpponent(tfUserName.getText(), clickedName);
                         requestMode = true;
                     }
-                }catch (Exception ex){
-                    System.out.println("ListClickeError:"+ex);
+                }catch (Exception e){
+                    if(enableLog) {
+                        String logText = logException + "Im Click-Event in der Gegnerliste - "+e;
+                        System.out.println(logText);
+                        clientLog.addLogItem(logText);
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -467,7 +572,12 @@ public class RmiClient extends Application{
         try {
             rmiServerInterface.setStone(gameID, stone);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            if(enableLog) {
+                String logText = logException + "Beim Senden des Steins an den Server - "+e;
+                System.out.println(logText);
+                clientLog.addLogItem(logText);
+                e.printStackTrace();
+            }
         }
     }
 
@@ -475,7 +585,12 @@ public class RmiClient extends Application{
         try {
             rmiServerInterface.setGameControl(gameID, RmiServerInterface.CGAMESTATE,gameState);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            if(enableLog) {
+                String logText = logException + "Beim Senden des Spielstatus an den Server - "+e;
+                System.out.println(logText);
+                clientLog.addLogItem(logText);
+                e.printStackTrace();
+            }
         }
     }
 
@@ -483,9 +598,14 @@ public class RmiClient extends Application{
         try {
             rmiServerInterface.setGameControl(gameID, RmiServerInterface.CBOARDFULL,0);
             rmiServerInterface.setRequestState(gameID, RmiServerInterface.FINISH);
-            runningGameThread = false;
+            stopGameThread();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            if(enableLog) {
+                String logText = logException + "Beim Senden des Brett voll an den Server - "+e;
+                System.out.println(logText);
+                clientLog.addLogItem(logText);
+                e.printStackTrace();
+            }
         }
     }
 
@@ -493,9 +613,14 @@ public class RmiClient extends Application{
         try {
             rmiServerInterface.setGameControl(gameID, RmiServerInterface.CGAMEWINNER,color ? 0 :1);
             rmiServerInterface.setRequestState(gameID, RmiServerInterface.FINISH);
-            runningGameThread = false;
+            stopGameThread();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            if(enableLog) {
+                String logText = logException + "Beim Senden des Gewinners an den Server - "+e;
+                System.out.println(logText);
+                clientLog.addLogItem(logText);
+                e.printStackTrace();
+            }
         }
     }
 
@@ -513,19 +638,22 @@ public class RmiClient extends Application{
             state = true;
             tfUserName.setDisable(true);
             tfServerIP.setDisable(true);
-            //TODO REMOVE
-            System.out.println("connection: "+connectionTimeline.getStatus());
-
             connectionTimeline.setCycleCount(Timeline.INDEFINITE);
             connectionTimeline.play();
             startRequestThread();
-            //TODO REMOVE
-            System.out.println("connection: "+connectionTimeline.getStatus());
-
         }catch (Exception e){
-            System.out.println("Connect Error: "+e);
+            if(enableLog) {
+                String logText = logException + "Beim Verbinden mit dem Server - "+e;
+                System.out.println(logText);
+                clientLog.addLogItem(logText);
+                e.printStackTrace();
+            }
             if(e.toString().contains("Connection refused")){
                 labelConnectionState.setText("Server nicht erreichbar!");
+                labelConnectionState.setTextFill(Color.RED);
+            }
+            if(e.toString().contains("Der Username wird Bereits verwendet. Bitte Neuen wählen")){
+                labelConnectionState.setText("Der Username wird Bereits verwendet.\nBitte Neuen wählen");
                 labelConnectionState.setTextFill(Color.RED);
             }
         }
@@ -541,7 +669,12 @@ public class RmiClient extends Application{
                 labelConnectionState.setText("Nicht verbunden!");
                 gameID = 0;
             }catch (Exception e){
-                System.out.println("Discconect Error: "+e);
+                if(enableLog) {
+                    String logText = logException + "Beim Trennen vom Server - "+e;
+                    System.out.println(logText);
+                    clientLog.addLogItem(logText);
+                    e.printStackTrace();
+                }
             }finally {
                 listView.getItems().clear();
                 try {
@@ -549,7 +682,12 @@ public class RmiClient extends Application{
                     stopRequestThread();
                     stopGameThread();
                 }catch (Exception e){
-                    System.out.println("StopThread Error: "+e);
+                    if(enableLog) {
+                        String logText = logException + "Beim Beenden der Serverabfragen - "+e;
+                        System.out.println(logText);
+                        clientLog.addLogItem(logText);
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -565,7 +703,12 @@ public class RmiClient extends Application{
                     mainStage.toBack();
                     gameUI.getPrimaryStage().toFront();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    if(enableLog) {
+                        String logText = logException + "Beim Verschieben der Fenster - "+e;
+                        System.out.println(logText);
+                        clientLog.addLogItem(logText);
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -588,5 +731,20 @@ public class RmiClient extends Application{
 
     private void stopGameThread(){
         runningGameThread = false;
+    }
+
+    private void openClientLog(){
+        enableLog = true;
+        try {
+            clientLog.start(new Stage());
+        } catch (Exception e) {
+            String logText = logException + "Beim Öffnen des Logs - "+e;
+            System.out.println(logText);
+            e.printStackTrace();
+        }
+    }
+
+    public void stopLog(){
+        enableLog =false;
     }
 }
