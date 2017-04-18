@@ -142,6 +142,7 @@ public class BasicUIX extends Application {
         boxWidth = boardSize/dimensions;
 
         Image image = new Image("images/field.png");
+        //asdasdasd
 
 //        c.setFill(new RadialGradient(0, 0, boardSize/2+boardXPOS, boardSize/2+boardYPOS, boardSize, true,
 //                CycleMethod.REFLECT,
@@ -529,7 +530,7 @@ public class BasicUIX extends Application {
 
         gameType = GameType.BOT;
         gameState = GameState.FIRSTMOVE;
-        board = new Board(getBoardDimensions());
+        board = new Board(getBoardDimensions(xWindowPos,yWindowPos));
         canvasAllowUserInput = true;
         render();
         color = true;
