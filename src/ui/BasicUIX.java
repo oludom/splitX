@@ -141,19 +141,19 @@ public class BasicUIX extends Application {
             for(int j = 0; j<dimensions;j++){
                 if(j%2==0) {
                     if(i%2==0){
-                        c.setFill(Color.SANDYBROWN);
+                        c.setFill(Color.BLUE);
                     }else {
-                        c.setFill(Color.BROWN);
+                        c.setFill(Color.CADETBLUE);
                     }
                 }else{
                     if(i%2!=0){
-                        c.setFill(Color.SANDYBROWN);
+                        c.setFill(Color.BLUE);
                     }else {
-                        c.setFill(Color.BROWN);
+                        c.setFill(Color.CADETBLUE);
                     }
                 }
                 c.fillRect(j*boxWidth+boardXPOS, i*boxWidth+boardYPOS, boxWidth, boxWidth);
-                c.drawImage(image, j*boxWidth+boardXPOS, i*boxWidth+boardYPOS, boxWidth, boxWidth);
+                //c.drawImage(image, j*boxWidth+boardXPOS, i*boxWidth+boardYPOS, boxWidth, boxWidth);
             }
         }
 
@@ -224,7 +224,31 @@ public class BasicUIX extends Application {
             button.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    startSingle();
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Fensterauswahl");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Soll das Spiel in einem neuen Fenster gestartet werden?");
+
+                    ButtonType buttonTypeE = new ButtonType("ja");
+                    ButtonType buttonTypeS = new ButtonType("nein", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                    alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent()) {
+                        if(result.get() == buttonTypeE){
+                            Stage newstage = new Stage();
+                            BasicUIX b = new BasicUIX();
+                            newstage.setScene(b.getScene());
+                            try{
+                                b.start(newstage);
+                                b.startSingle();
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }else {
+                            startSingle();
+                        }
+                    }
                 }
             });
             button.setId("button");
@@ -234,7 +258,31 @@ public class BasicUIX extends Application {
             button.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    startSingleBot();
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Fensterauswahl");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Soll das Spiel in einem neuen Fenster gestartet werden?");
+
+                    ButtonType buttonTypeE = new ButtonType("ja");
+                    ButtonType buttonTypeS = new ButtonType("nein", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                    alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent()) {
+                        if(result.get() == buttonTypeE){
+                            Stage newstage = new Stage();
+                            BasicUIX b = new BasicUIX();
+                            newstage.setScene(b.getScene());
+                            try{
+                                b.start(newstage);
+                                b.startSingleBot();
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }else {
+                            startSingleBot();
+                        }
+                    }
                 }
             });
             button.setId("button");
@@ -244,7 +292,33 @@ public class BasicUIX extends Application {
             button.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    startMulti();
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Fensterauswahl");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Soll das Spiel in einem neuen Fenster gestartet werden?");
+
+                    ButtonType buttonTypeE = new ButtonType("ja");
+                    ButtonType buttonTypeS = new ButtonType("nein", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                    alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
+                    Optional<ButtonType> result = alert.showAndWait();
+
+
+                    if (result.isPresent()) {
+                        if(result.get() == buttonTypeE){
+                            Stage newstage = new Stage();
+                            BasicUIX b = new BasicUIX();
+                            newstage.setScene(b.getScene());
+                            try{
+                                b.start(newstage);
+                                b.startMulti();
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }else {
+                            startMulti();
+                        }
+                    }
                 }
             });
             button.setId("button");
@@ -254,7 +328,33 @@ public class BasicUIX extends Application {
             button.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    startBot();
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Fensterauswahl");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Soll das Spiel in einem neuen Fenster gestartet werden?");
+
+                    ButtonType buttonTypeE = new ButtonType("ja");
+                    ButtonType buttonTypeS = new ButtonType("nein", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                    alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
+                    Optional<ButtonType> result = alert.showAndWait();
+
+
+                    if (result.isPresent()) {
+                        if(result.get() == buttonTypeE){
+                            Stage newstage = new Stage();
+                            BasicUIX b = new BasicUIX();
+                            newstage.setScene(b.getScene());
+                            try{
+                                b.start(newstage);
+                                b.startBot();
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }else {
+                            startBot();
+                        }
+                    }
                 }
             });
             button.setId("button");
@@ -438,7 +538,7 @@ public class BasicUIX extends Application {
 
     }
 
-    private void startSingle() {
+    public void startSingle() {
 
         gameType = GameType.SINGLEPLAYER;
         gameState = GameState.FIRSTMOVE;
@@ -498,13 +598,17 @@ public class BasicUIX extends Application {
         return (int) ((y-boardYPOS)/boxWidth);
     }
 
+    public Scene getScene() {
+        return scene;
+    }
+
     private void setStone(int x, int y){
 
         if(canvasAllowUserInput){
             String winningPhrase = "";
             String errorPhrase = "";
             if (x >= 0 && y >= 0 && y < board.getDimension() && x <board.getDimension()) {
-                y++;//Muss für das Board in der Console herhöht werden
+                y++;//Muss für das Board in der Console erhöht werden
                 switch (gameType){
                     case SINGLEPLAYER:
 
@@ -518,7 +622,6 @@ public class BasicUIX extends Application {
                             board.checkWinner();
 
                             gameState = GameState.values()[gameState.ordinal()+1];
-                            System.out.println(gameState);
                             if(gameState.ordinal() > GameState.BLACKSECOND.ordinal())
                                 gameState = GameState.WHITE;
                             if(gameState.equals(GameState.BLACK) || gameState.equals(GameState.BLACKSECOND))
@@ -590,8 +693,6 @@ public class BasicUIX extends Application {
                                 gameState = GameState.BLACK;
 
                             }
-
-                            //
 
 
                         }catch (GameException.GameWonException e) {
