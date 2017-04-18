@@ -12,9 +12,13 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import ki.Bot;
@@ -44,7 +48,9 @@ public class BasicUIX extends Application {
     private double boxWidth;
     private double boardSize;
 
-    Timeline timer;
+    private Bot SinglePlayerBot;
+
+    private Timeline timer;
 
     //Für Multiplayer
     RmiClient rmiClient;
@@ -65,6 +71,7 @@ public class BasicUIX extends Application {
         scene = new Scene(root, 1150, 1000);
         primaryStage.setScene(scene);
         root.setRight(getMenu_GameSelect());
+        scene.getStylesheets().add("css/styles.css");
 
         primaryStage.show();
 
@@ -86,8 +93,14 @@ public class BasicUIX extends Application {
             public void handle(MouseEvent event) {
                 double x = event.getX();
                 double y = event.getY();
-                //TODO Hoverfarbe anpassen MuliPlayer red/green single: schwarz weiß
-                drawHover(getFieldX(x), getFieldY(y), Color.GRAY);
+
+                Color hovercolor;
+                if(color){
+                    hovercolor = Color.rgb(0,0,0, .3);
+                }else {
+                    hovercolor = Color.rgb(255,255,255, .3);
+                }
+                drawHover(getFieldX(x), getFieldY(y), hovercolor);
             }
         });
         canvas.setOnMouseClicked(new javafx.event.EventHandler<MouseEvent>() {
@@ -128,22 +141,31 @@ public class BasicUIX extends Application {
         int dimensions = board.getDimension();
         boxWidth = boardSize/dimensions;
 
+        Image image = new Image("images/field.png");
+
+//        c.setFill(new RadialGradient(0, 0, boardSize/2+boardXPOS, boardSize/2+boardYPOS, boardSize, true,
+//                CycleMethod.REFLECT,
+//                new Stop(0.0, Color.rgb(221,240,255)),
+//                new Stop(1.0, Color.rgb(249,252,255))));
+//        c.fillRect(boardXPOS,boardYPOS, boardSize, boardSize);
+
         for(int i = 0; i<dimensions; i++){
             for(int j = 0; j<dimensions;j++){
                 if(j%2==0) {
                     if(i%2==0){
-                        c.setFill(Color.SANDYBROWN);
+                        c.setFill(Color.BLUE);
                     }else {
-                        c.setFill(Color.BROWN);
+                        c.setFill(Color.CADETBLUE);
                     }
                 }else{
                     if(i%2!=0){
-                        c.setFill(Color.SANDYBROWN);
+                        c.setFill(Color.BLUE);
                     }else {
-                        c.setFill(Color.BROWN);
+                        c.setFill(Color.CADETBLUE);
                     }
                 }
                 c.fillRect(j*boxWidth+boardXPOS, i*boxWidth+boardYPOS, boxWidth, boxWidth);
+                //c.drawImage(image, j*boxWidth+boardXPOS, i*boxWidth+boardYPOS, boxWidth, boxWidth);
             }
         }
 
@@ -205,7 +227,7 @@ public class BasicUIX extends Application {
         if(menu_GameSelect == null){
             menu_GameSelect = new VBox();
 
-            Label l = new Label("Menu");
+            Label l = new Label(" ");
             menu_GameSelect.getChildren().add(l);
 
             // create buttons for menu
@@ -213,39 +235,144 @@ public class BasicUIX extends Application {
             button.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    startSingle();
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Fensterauswahl");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Soll das Spiel in einem neuen Fenster gestartet werden?");
+
+                    ButtonType buttonTypeE = new ButtonType("ja");
+                    ButtonType buttonTypeS = new ButtonType("nein", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                    alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent()) {
+                        if(result.get() == buttonTypeE){
+                            Stage newstage = new Stage();
+                            BasicUIX b = new BasicUIX();
+                            newstage.setScene(b.getScene());
+                            try{
+                                b.start(newstage);
+                                b.startSingle();
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }else {
+                            startSingle();
+                        }
+                    }
                 }
             });
+            button.setId("button");
             menu_GameSelect.getChildren().add(button);
 
             button = new Button("1vBot");
             button.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    startSingleBot();
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Fensterauswahl");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Soll das Spiel in einem neuen Fenster gestartet werden?");
+
+                    ButtonType buttonTypeE = new ButtonType("ja");
+                    ButtonType buttonTypeS = new ButtonType("nein", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                    alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent()) {
+                        if(result.get() == buttonTypeE){
+                            Stage newstage = new Stage();
+                            BasicUIX b = new BasicUIX();
+                            newstage.setScene(b.getScene());
+                            try{
+                                b.start(newstage);
+                                b.startSingleBot();
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }else {
+                            startSingleBot();
+                        }
+                    }
                 }
             });
+            button.setId("button");
             menu_GameSelect.getChildren().add(button);
 
             button = new Button("Multiplayer");
             button.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    startMulti();
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Fensterauswahl");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Soll das Spiel in einem neuen Fenster gestartet werden?");
+
+                    ButtonType buttonTypeE = new ButtonType("ja");
+                    ButtonType buttonTypeS = new ButtonType("nein", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                    alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
+                    Optional<ButtonType> result = alert.showAndWait();
+
+
+                    if (result.isPresent()) {
+                        if(result.get() == buttonTypeE){
+                            Stage newstage = new Stage();
+                            BasicUIX b = new BasicUIX();
+                            newstage.setScene(b.getScene());
+                            try{
+                                b.start(newstage);
+                                b.startMulti();
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }else {
+                            startMulti();
+                        }
+                    }
                 }
             });
+            button.setId("button");
             menu_GameSelect.getChildren().add(button);
 
             button = new Button("BotvBot");
             button.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    startBot();
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Fensterauswahl");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Soll das Spiel in einem neuen Fenster gestartet werden?");
+
+                    ButtonType buttonTypeE = new ButtonType("ja");
+                    ButtonType buttonTypeS = new ButtonType("nein", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                    alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
+                    Optional<ButtonType> result = alert.showAndWait();
+
+
+                    if (result.isPresent()) {
+                        if(result.get() == buttonTypeE){
+                            Stage newstage = new Stage();
+                            BasicUIX b = new BasicUIX();
+                            newstage.setScene(b.getScene());
+                            try{
+                                b.start(newstage);
+                                b.startBot();
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }else {
+                            startBot();
+                        }
+                    }
                 }
             });
-
+            button.setId("button");
             menu_GameSelect.getChildren().add(button);
             menu_GameSelect.setMinWidth(150d);
+            menu_GameSelect.setSpacing(10);
+//            menu_GameSelect.setStyle("-fx-background-color: darkred");
 
         }
         return menu_GameSelect;
@@ -254,6 +381,7 @@ public class BasicUIX extends Application {
 
     private void startBot() {
 
+        canvasAllowUserInput = false;
         board = new Board(getBoardDimensions(xWindowPos,yWindowPos));
         boolean enableHardMode1 = false;
 
@@ -268,12 +396,15 @@ public class BasicUIX extends Application {
         alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
         Optional<ButtonType> result = alert.showAndWait();
 
-        if(result.get() == buttonTypeS){
-            enableHardMode1 = true;
-        } if (result.get() == buttonTypeE){
-            enableHardMode1 = false;
-        }else {
-            enableHardMode1 = false;
+
+        if (result.isPresent()) {
+            if(result.get() == buttonTypeS){
+                enableHardMode1 = true;
+            }else if (result.get() == buttonTypeE){
+                enableHardMode1 = false;
+            }else {
+                enableHardMode1 = false;
+            }
         }
 
 
@@ -305,7 +436,7 @@ public class BasicUIX extends Application {
         render();
 
 
-        timer = new Timeline(new KeyFrame(javafx.util.Duration.seconds(1d), new EventHandler<ActionEvent>() {
+        timer = new Timeline(new KeyFrame(javafx.util.Duration.seconds(.5d), new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 startBot(blackBot, whiteBot);
@@ -325,19 +456,13 @@ public class BasicUIX extends Application {
 
         for(int i = 1; i <= 2; i++){
             if(!errorPhrase.equals("")){
-                final String phrase = errorPhrase;
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Fehler!");
+                alert.setHeaderText(null);
+                alert.setContentText(errorPhrase);
 
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Fehler!");
-                        alert.setHeaderText(null);
-                        alert.setContentText(phrase);
-
-                        alert.showAndWait();
-                    }
-                });
+                timer.stop();
+                alert.show();
             }
             errorPhrase = "";
             try{
@@ -400,9 +525,45 @@ public class BasicUIX extends Application {
 
     private void startSingleBot() {
 
+        boolean enableHardMode = false;
+
+        gameType = GameType.BOT;
+        gameState = GameState.FIRSTMOVE;
+        board = new Board(getBoardDimensions());
+        canvasAllowUserInput = true;
+        render();
+        color = true;
+
+        //TODO tell user what to do
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("dein Gegner");
+        alert.setHeaderText(null);
+        alert.setContentText("Welche Stufe soll der Bot haben?");
+
+        ButtonType buttonTypeE = new ButtonType("Einfach");
+        ButtonType buttonTypeS = new ButtonType("Schwer");
+
+        alert.getButtonTypes().setAll(buttonTypeE,buttonTypeS);
+        Optional<ButtonType> result = alert.showAndWait();
+
+
+        if (result.isPresent()) {
+            if(result.get() == buttonTypeS){
+                enableHardMode = true;
+            }else if (result.get() == buttonTypeE){
+                enableHardMode = false;
+            }else {
+                enableHardMode = false;
+            }
+        }
+
+        SinglePlayerBot = new Bot(board, false, enableHardMode, false);
+
+
     }
 
-    private void startSingle() {
+    public void startSingle() {
 
         gameType = GameType.SINGLEPLAYER;
         gameState = GameState.FIRSTMOVE;
@@ -466,16 +627,22 @@ public class BasicUIX extends Application {
         return (int) ((y-boardYPOS)/boxWidth);
     }
 
+    public Scene getScene() {
+        return scene;
+    }
+
     private void setStone(int x, int y){
 
         if(canvasAllowUserInput){
-
+            String winningPhrase = "";
+            String errorPhrase = "";
             if (x >= 0 && y >= 0 && y < board.getDimension() && x <board.getDimension()) {
-                y++;//Muss für das Board in der Console herhöht werden
-                String winningPhrase = "";
-                String errorPhrase = "";
+                y++;//Muss für das Board in der Console erhöht werden
                 switch (gameType){
                     case SINGLEPLAYER:
+
+                        winningPhrase = "";
+                        errorPhrase = "";
 
                         try{
 
@@ -484,8 +651,6 @@ public class BasicUIX extends Application {
                             board.checkWinner();
 
                             gameState = GameState.values()[gameState.ordinal()+1];
-                            //TODO REMOVE
-//                            System.out.println(gameState);
                             if(gameState.ordinal() > GameState.BLACKSECOND.ordinal())
                                 gameState = GameState.WHITE;
                             if(gameState.equals(GameState.BLACK) || gameState.equals(GameState.BLACKSECOND))
@@ -509,21 +674,93 @@ public class BasicUIX extends Application {
                         }
 
                         if(!winningPhrase.equals("")){
-                            setGameBrake(winningPhrase, true);
+                            canvasAllowUserInput = false;
+                            gameType = GameType.NONE;
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Spiel beendet!");
+                            alert.setHeaderText(null);
+                            alert.setContentText(winningPhrase);
+
+                            alert.showAndWait();
                         }
                         if(!errorPhrase.equals("")){
-//                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//                            alert.setTitle("Fehler!");
-//                            alert.setHeaderText(null);
-//                            alert.setContentText(errorPhrase);
-//
-//                            alert.showAndWait();
-                            setGameBrake(errorPhrase, false);
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Fehler!");
+                            alert.setHeaderText(null);
+                            alert.setContentText(errorPhrase);
+
+                            alert.showAndWait();
+                        }
+                        break;
+
+                    case BOT:
+
+                        winningPhrase = "";
+                        errorPhrase = "";
+
+                        try{
+
+                            if(gameState == GameState.FIRSTMOVE || gameState == GameState.BLACK || gameState == GameState.BLACKSECOND){
+                                color = true;
+                                board.addStone(new Stone(new BoardPoint(BoardPoint.getX(x),y), color));
+                                render();
+                                board.checkWinner();
+                                if(gameState == GameState.BLACKSECOND){
+                                    gameState = GameState.WHITE;
+                                }else{
+                                    gameState = GameState.values()[gameState.ordinal()+1];
+                                }
+
+                            }
+                            if(gameState == GameState.WHITE){
+                                // Bot moves
+
+                                color = false;
+                                SinglePlayerBot.next();
+                                SinglePlayerBot.next();
+                                board.checkWinner();
+                                gameState = GameState.BLACK;
+
+                            }
+
+
+                        }catch (GameException.GameWonException e) {
+                            canvasAllowUserInput = false;
+                            winningPhrase = e.toString();
+                        }catch (GameException.BoardOutOfBoundException e) {
+                            errorPhrase = e.toString();
+
+                        }catch (GameException.BoardFullException e) {
+                            canvasAllowUserInput = false;
+                            winningPhrase = e.toString();
+                        }catch (Exception e) {
+                            errorPhrase = e.toString();
+                        }finally {
+                            render();
+                        }
+
+                        if(!winningPhrase.equals("")){
+                            canvasAllowUserInput = false;
+                            gameType = GameType.NONE;
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Spiel beendet!");
+                            alert.setHeaderText(null);
+                            alert.setContentText(winningPhrase);
+
+                            alert.showAndWait();
+                        }
+                        if(!errorPhrase.equals("")){
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Fehler!");
+                            alert.setHeaderText(null);
+                            alert.setContentText(errorPhrase);
+
+                            alert.showAndWait();
                         }
 
                         break;
-                    case MULTIPLAYER:
 
+                    case MULTIPLAYER:
                         try{
                             boolean ableToPlay = false;
                             board.checkWinner();
@@ -573,6 +810,7 @@ public class BasicUIX extends Application {
                         if(!errorPhrase.equals("")){
                             setGameBrake(errorPhrase, false);
                         }
+                        break;
 
                 }
             }
