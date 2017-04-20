@@ -5,13 +5,22 @@
     -fx-min-height: 30px;
     -fx-font-size: 18px;
     -fx-border: none;
-    -fx-background-color: olive;
+    -fx-background-color: #1523ff;
     -fx-border-radius: 0px;
+    -fx-text-fill: #15ffe3;
 }
 
 #button:hover{
-    -fx-background-color: olivedrab;
+    -fx-background-color: #1357EB;
 }
 #button:pressed{
-    -fx-background-color: green;
+    -fx-background-color: #13C7E8;
+}
+
+.font{
+    -fx-font-size: 18px;
+}
+.size{
+    -fx-max-width: 150px;
+    -fx-min-height: 30px;
 }

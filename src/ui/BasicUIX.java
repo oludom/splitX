@@ -154,15 +154,15 @@ public class BasicUIX extends Application {
             for(int j = 0; j<dimensions;j++){
                 if(j%2==0) {
                     if(i%2==0){
-                        c.setFill(Color.BLUE);
+                        c.setFill(Color.rgb(19,87,232));
                     }else {
-                        c.setFill(Color.CADETBLUE);
+                        c.setFill(Color.rgb(34,163,255));
                     }
                 }else{
                     if(i%2!=0){
-                        c.setFill(Color.BLUE);
+                        c.setFill(Color.rgb(19,87,232));
                     }else {
-                        c.setFill(Color.CADETBLUE);
+                        c.setFill(Color.rgb(34,163,255));
                     }
                 }
                 c.fillRect(j*boxWidth+boardXPOS, i*boxWidth+boardYPOS, boxWidth, boxWidth);

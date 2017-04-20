@@ -472,12 +472,13 @@ public class RmiClient extends Application{
         mainStage = primaryStage;
 
         StackPane root = new StackPane();
-        Scene scene = new Scene(root, 600, 600);
+        Scene scene = new Scene(root, 700, 600);
         primaryStage.setScene(scene);
         xWindowPos = gameUI.getPrimaryStage().getX() + scene.getWidth() /2;
         yWindowPos = gameUI.getPrimaryStage().getY() + scene.getHeight() /3;
         primaryStage.setX(xWindowPos);
         primaryStage.setY(yWindowPos);
+        scene.getStylesheets().add("css/styles.css");
 
         BorderPane borderPane = new BorderPane();
         GridPane topGridPane = new GridPane();
@@ -486,6 +487,10 @@ public class RmiClient extends Application{
         Button btnClientLog  = new Button("Log öffnen");
         Label labelState  = new Label("Verbindunsstatus:");
         Label labelUsername = new Label("Benutzername:");
+
+        btnConnect.setId("button");
+        btnClientLog.setId("button");
+        btnDisconnect.setId("button");
 
         borderPane.setCenter(listView);
         borderPane.setTop(topGridPane);
@@ -500,9 +505,14 @@ public class RmiClient extends Application{
         topGridPane.add(btnDisconnect,2,3);
         topGridPane.add(labelState,3,3);
         topGridPane.add(labelConnectionState, 4,3);
-        topGridPane.add(btnClientLog, 5, 3);
+        topGridPane.add(btnClientLog, 4, 1);
         topGridPane.setHgap(5);
         topGridPane.setVgap(10);
+
+        topGridPane.getStyleClass().add("font");
+        tfServerIP.getStyleClass().add("size");
+        tfUserName.getStyleClass().add("size");
+        listView.getStyleClass().add("font");
 
         listView.setItems(opponents);
         tfUserName.setText(System.getProperty("user.name"));
